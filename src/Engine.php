@@ -359,6 +359,14 @@ class Engine implements EngineInterface
                 $updatedContent[] = $line;
                 continue;
             }
+
+            // in case only '{{' exists , consider this a normal line
+            if ($this->phraseExists(['{{'], $line) &&
+                !$this->phraseExists(['}}'], $line)
+            ) {
+                $updatedContent[] = $line;
+                continue;
+            }
             
             // handle extend template case
             if (preg_match('~{% extend ([\"|\']+){1}([a-zA-Z0-9\.]+)(\1) %}~',

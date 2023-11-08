@@ -1,0 +1,27 @@
+{-- Single Line Comment --}
+
+{-- Multi 
+    Line
+    Comments --}
+
+{-- #1 : Test variables  --}
+{{ $test1 }}
+
+{-- #2 : Test expressions  --}
+{{ (1 + 1) * (1 + 1) }}
+
+{-- #3 : Test built in functions  --}
+{{ strtolower('TEST TEXT') }}
+
+{-- #4 : Test html tags  --}
+<b>{{ date('Y-m-d') }} <i>{-- This souldn't be printed --}</i></b>
+<p>{{ ($test1 == 'TEST #1') ? md5($test1) : '' }}</p>
+
+{-- #5 : Test ternary operator  --}
+<h1>{{ isset($unknown) ? 'yes' : 'no' }}</h1>
+
+{-- #6 : Test unclosed print expression are printed as normal text  --}
+<article>{{ $test1</article>
+
+{-- #7 : Test spaces doesn't effect the printing expression   --}
+{{   $test1                 }}

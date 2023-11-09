@@ -37,13 +37,15 @@ class ExpressionEvaluator implements ExpressionEvaluatorInterface
      */
     public static function execute($expression, $data = [])
     {
-        // check is the expression is safe.
-        foreach (self::$blackList as $keyword) {
-            preg_match_all('~' . $keyword . '~', $expression, $matches);
+        // check is the expression is safe.        
+        $expressionFiltered = preg_replace([
+            '~([\"|\'\`]+)(.*?)(\1)~'
+        ], '', $expression);
 
-            if (!empty($matches[0])) {
+        foreach (self::$blackList as $keyword) {
+            if (strpos($expressionFiltered, $keyword) !== false) {
                 throw new \RuntimeException(
-                    "Invalid expression : {$expression}"
+                    "Invalid expression : ({$expression})"
                 );
             }
         }

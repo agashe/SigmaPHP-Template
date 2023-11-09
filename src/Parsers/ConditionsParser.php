@@ -195,7 +195,7 @@ class ConditionsParser implements ParserInterface
                     }
 
                     $this->inlineConditions[end($currentStartTags)] = [
-                        'start' => $ifStartTag[end($currentStartTags)],
+                        'start' => $ifStartTag[end($currentStartTags)] ?? 0,
                         'else_if' => $elseIfBlock,
                         'else' => $elseBlock,
                         'end' => $ifEndTag[end($currentStartTags)],
@@ -572,7 +572,7 @@ class ConditionsParser implements ParserInterface
                 }
 
                 $this->conditions[] = [
-                    'start' => $ifStartTag[end($currentStartTags)],
+                    'start' => $ifStartTag[end($currentStartTags)] ?? 0,
                     'else_if' => $elseIfBlock,
                     'else' => $elseBlock,
                     'end' => $ifEndTag[end($currentStartTags)],

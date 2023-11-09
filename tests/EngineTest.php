@@ -87,6 +87,59 @@ class EngineTest extends TestCase
     }
 
     /**
+     * Test invalid templates.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testInvalidTemplates()
+    {
+        $exceptionsCount = 0;
+
+        $invalidTemplates = [
+            'invalid.expression',
+            'invalid.extend',
+            
+            'invalid.blocks.close_tag',
+            'invalid.blocks.open_tag',
+            'invalid.blocks.tag_labels',
+            'invalid.blocks.inline.close_tag',
+            'invalid.blocks.inline.open_tag',
+            'invalid.blocks.inline.tag_labels',
+
+            'invalid.conditions.close_tag',
+            'invalid.conditions.open_tag',
+            'invalid.conditions.else_if_tag',
+            'invalid.conditions.else_tag',
+            'invalid.conditions.inline.close_tag',
+            'invalid.conditions.inline.open_tag',
+            'invalid.conditions.inline.else_if_tag',
+            'invalid.conditions.inline.else_tag',
+
+            'invalid.loops.close_tag',
+            'invalid.loops.open_tag',
+            // 'invalid.loops.break_tag',
+            // 'invalid.loops.continue_tag',
+            'invalid.loops.inline.close_tag',
+            'invalid.loops.inline.open_tag',
+            // 'invalid.loops.inline.break_tag',
+            // 'invalid.loops.inline.continue_tag',
+        ];
+
+        foreach ($invalidTemplates as $invalidTemplate) {
+            try {
+                $this->engine->render($invalidTemplate);
+            } catch (\Exception $e) {
+                if ($e instanceof \RuntimeException) {
+                    $exceptionsCount += 1;
+                }
+            }
+        }
+
+        $this->assertEquals(count($invalidTemplates), $exceptionsCount);
+    }
+
+    /**
      * Test basic engine's functionality.
      *
      * @runInSeparateProcess
@@ -102,20 +155,6 @@ class EngineTest extends TestCase
             $this->renderTemplate('basic', $variables),
             $this->getTemplateResult('basic')
         ));
-    }
-
-    /**
-     * Test engine will through exception if the expression contains suspicious 
-     * functions like eval...etc.
-     *
-     * @runInSeparateProcess
-     * @return void
-     */
-    public function testEngineWillThroughExceptionIfTheExpressionIsSuspicious()
-    {
-        $this->expectException(RuntimeException::class);
-    
-        $this->engine->render('invalid.expression');
     }
 
     /**
@@ -147,20 +186,6 @@ class EngineTest extends TestCase
     }
 
     /**
-     * Test engine will through exception if the template we try to extend 
-     * doesn't exists.
-     *
-     * @runInSeparateProcess
-     * @return void
-     */
-    public function testEngineWillThroughExceptionIfExtendedTemplateNotFound()
-    {
-        $this->expectException(RuntimeException::class);
-    
-        $this->engine->render('invalid.extend');
-    }
-
-    /**
      * Test blocks.
      *
      * @runInSeparateProcess
@@ -172,85 +197,6 @@ class EngineTest extends TestCase
             $this->renderTemplate('blocks'),
             $this->getTemplateResult('blocks')
         ));
-    }
-
-    /**
-     * Test engine will through exception if unmatched block's close tag.
-     *
-     * @runInSeparateProcess
-     * @return void
-     */
-    public function testEngineWillThroughExceptionIfUnmatchedBlockCloseTag()
-    {
-        $this->expectException(RuntimeException::class);
-    
-        $this->engine->render('invalid.blocks.close_tag');
-    }
-   
-    /**
-     * Test engine will through exception if unmatched block's open tag.
-     *
-     * @runInSeparateProcess
-     * @return void
-     */
-    public function testEngineWillThroughExceptionIfUnmatchedBlockOpenTag()
-    {
-        $this->expectException(RuntimeException::class);
-    
-        $this->engine->render('invalid.blocks.open_tag');
-    }
-    
-    /**
-     * Test engine will through exception if unmatched block's tag labels.
-     *
-     * @runInSeparateProcess
-     * @return void
-     */
-    public function testEngineWillThroughExceptionIfUnmatchedBlockTagLabels()
-    {
-        $this->expectException(RuntimeException::class);
-    
-        $this->engine->render('invalid.blocks.tag_labels');
-    }
-    
-    /**
-     * Test engine will through exception if unmatched inline block's close tag.
-     *
-     * @runInSeparateProcess
-     * @return void
-     */
-    public function testEngineThroughExceptionIfUnmatchedInlineBlockCloseTag()
-    {
-        $this->expectException(RuntimeException::class);
-    
-        $this->engine->render('invalid.blocks.inline.close_tag');
-    }
-   
-    /**
-     * Test engine will through exception if unmatched inline block's open tag.
-     *
-     * @runInSeparateProcess
-     * @return void
-     */
-    public function testEngineThroughExceptionIfUnmatchedInlineBlockOpenTag()
-    {
-        $this->expectException(RuntimeException::class);
-    
-        $this->engine->render('invalid.blocks.inline.open_tag');
-    }
-    
-    /**
-     * Test engine will through exception if unmatched inline block's tag 
-     * labels.
-     *
-     * @runInSeparateProcess
-     * @return void
-     */
-    public function testEngineThroughExceptionIfUnmatchedInlineBlockTagLabels()
-    {
-        $this->expectException(RuntimeException::class);
-    
-        $this->engine->render('invalid.blocks.inline.tag_labels');
     }
 
     /**
@@ -270,8 +216,6 @@ class EngineTest extends TestCase
             $this->getTemplateResult('conditions')
         ));
     }
-
-    // test exceptions for invalid if, else if, else , end if
 
     /**
      * Test loops.
@@ -294,8 +238,6 @@ class EngineTest extends TestCase
             $this->getTemplateResult('loops')
         ));
     }
-
-    // test exceptions for invalid for, break, continue , end for
 
     // full
     // weird

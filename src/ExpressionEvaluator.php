@@ -39,7 +39,7 @@ class ExpressionEvaluator implements ExpressionEvaluatorInterface
     {
         // check is the expression is safe.
         foreach (self::$blackList as $keyword) {
-            preg_match_all('~^' . $keyword . '$~', $expression, $matches);
+            preg_match_all('~' . $keyword . '~', $expression, $matches);
 
             if (!empty($matches[0])) {
                 throw new \RuntimeException(
@@ -48,10 +48,24 @@ class ExpressionEvaluator implements ExpressionEvaluatorInterface
             }
         }
 
-        $result = '';
         extract($data);
-        eval("\$result = $expression;");
 
+        // check if all variables are defined , since eval() will only through
+        // Warning if the variable is not defined
+        $matches = [];
+        preg_match_all('~\$([a-zA-Z0-9_]+)~', $expression, $matches);
+
+        foreach ($matches[1] as $match) {
+            if (!isset(${$match})) {
+                throw new \RuntimeException(
+                    "Undefined variable : $$match"
+                );
+            }
+        }
+
+        $result = '';
+        eval("\$result = $expression;");
+        
         return $result;
     }
 }

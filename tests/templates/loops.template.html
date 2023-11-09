@@ -1,0 +1,61 @@
+I have some litters : {% for $litter in 'abcd' %} {% continue ($litter == 'c') %} {{ $litter }} {% end_for %} thanks
+
+{% for $i in 2 %} {% for $j in 2 %} {% for $k in 2 %} {{$i * $j * $k}} {% end_for %} {% end_for %} {% end_for %}
+
+{% for $item in $items %} {{ $item }} {% end_for %}
+
+{% for $i in 2 %} {% for $j in 2 %} {% if ($j == 2) %} {{$i * $j}} {% end_if %} {% end_for %} {% end_for %}
+
+Test #1 :
+{% for $litter in 'abcd' %}
+    {{ $litter }}
+{% end_for %}
+
+{% for $num in 5 %}
+    {{ $num }}
+{% end_for %}
+
+{% for $value in [1, 2, 3, 4, 5] %}
+    {{ $value }}
+{% end_for %}
+
+{% for $item in $items %}
+    {{ $item }}
+{% end_for %}
+
+Test #2 :
+{% for $it1 in 2 %}
+    <first loop here -------------- >
+
+    {% for $it2 in 2 %}
+        <second loop here ----------------- >
+    
+        {% for $it3 in 2 %}
+            <third loop here ----------------- >
+        {% end_for %}
+    {% end_for %}
+{% end_for %}
+
+{% for $it1 in 2 %}
+    <#1 -------------- >
+
+    {% for $it2 in 2 %}
+        <#2 ----------------- >
+    {% end_for %}
+
+    {% for $it3 in 2 %}
+        <#3 ----------------- >
+    {% end_for %}
+{% end_for %}
+
+Test #3 :
+
+{% for $n in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] %}
+    {% continue ($n % 2 == 0) %}
+    {{ $n }}
+{% end_for %}
+
+{% for $litter in 'hello world' %}
+    {% break ($litter == ' ') %}
+    {{ $litter }}
+{% end_for %}

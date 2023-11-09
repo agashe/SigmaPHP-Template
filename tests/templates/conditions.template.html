@@ -1,0 +1,77 @@
+{% if (isset($test1)) %} 
+    Test 1 is set !
+{% end_if %}
+
+{% if ($test1 == 'TEST FOO') %} 
+    Test 1 equals foo
+{% else %} 
+    Test doesn't equals foo
+{% end_if %}
+
+{% if ($test1 == 'TEST FOO') %} 
+    Test 1 equals : Foo
+{% else_if ($test1 == 'TEST #1') %} 
+    Test 1 equals : TEST #1
+{% else %} 
+    Test doesn't quals foo or test #1
+{% end_if %}
+
+{% if (isset($test1)) %} 
+    {% if ($test1 == 'TEST #1') %} 
+        Test 1 equals : TEST #1
+    {% end_if %}
+{% end_if %}
+
+{% define $grade = 75 %}
+
+{% if ($grade >= 90) %}
+    Excellent
+{% else_if ($grade >= 80 && $grade < 90) %}
+    Very Good
+{% else_if ($grade >= 70 && $grade < 80) %}
+    Very Good
+{% else_if ($grade >= 60 && $grade < 70) %}
+    Good
+{% else %} 
+    Fail
+{% end_if %}
+
+{% if (isset($grade)) %} 
+    {% if ($grade >= 90) %}
+        Excellent
+    {% else_if ($grade >= 80 && $grade < 90) %}
+        Very Good
+    {% else_if ($grade >= 70 && $grade < 80) %}
+        Very Good
+    {% else_if ($grade >= 60 && $grade < 70) %}
+        Good
+    {% else %} 
+        Fail
+    {% end_if %}
+{% end_if %}
+
+{% if (isset($test1)) %} 
+    {% block 'foo' %}
+        foo
+    {% end_block %}
+
+    {% show_block 'foo' %}
+{% end_if %}
+
+{% show_block 'foo' %}
+
+{% if (1) %} 
+    {% define $x =          1000 %}
+    {{$x}}
+{% end_if %}
+
+{%                  if (isset($test1))                   %}{% block 'bar' %}bar{% end_block 'bar' %}{% end_if %}{% show_block 'bar' %}{% define $boo = true %}
+
+{% if (0) %} test1 {% else_if (0) %} test2 {% else_if (1) %} {% if (1) %} test3 {% end_if %} {% else_if (0) %} test4 {% else %} test5 {% end_if %}
+{% if (1) %} {% if (0) %} test1 {% else_if (1) %} test2 {% else %} test3 {% end_if %} {% else %} test4  {% end_if %} {% if ($boo) %} {% if ($foo) %} test5 {% else_if (0) %} test6 {% else %} test7 {% end_if %} {% else %} test8  {% end_if %}
+
+<div class="alert {% if ($test1 == 'TEST #1') %}         alert-success    {% else %} alert-basic      {% end_if %}">This is some content</div>
+
+{% if (1) %} {% define $x =          1000 %}{{$x}}{% end_if %}
+
+{% define $foo = true %}

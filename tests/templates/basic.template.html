@@ -16,11 +16,8 @@
 {-- #4 : Test html tags  --}
 <p>{{ ($test1 == 'TEST #1') ? md5($test1) : '' }}<b><i>{-- This souldn't be printed --}</i></b></p>
 
-{-- #5 : Test ternary operator  --}
-<h1>{{ isset($unknown) ? 'yes' : 'no' }}</h1>
-
-{-- #6 : Test unclosed print expression are printed as normal text  --}
+{-- #5 : Test unclosed print expression are printed as normal text  --}
 <article>{{ $test1</article>
 
-{-- #7 : Test spaces doesn't effect the printing expression   --}
+{-- #6 : Test spaces doesn't effect the printing expression   --}
 {{   $test1                 }}

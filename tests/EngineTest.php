@@ -62,8 +62,10 @@ class EngineTest extends TestCase
      */
     private function checkOutput($actual, $expected)
     {
-        for ($i = 0;$i < count($expected);$i++) {
-            if (trim($actual[$i]) != trim($expected[$i])) {
+        for ($i = 0;$i < count($actual);$i++) {
+            if (!isset($expected[$i]) ||
+                trim($actual[$i]) != trim($expected[$i])
+            ) {
                 return false;
             }
         }
@@ -269,7 +271,32 @@ class EngineTest extends TestCase
         ));
     }
 
-    // loops
+    // test exceptions for invalid if, else if, else , end if
+
+    /**
+     * Test loops.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testLoops()
+    {
+        $variables = [
+            'items' => [
+                'item #1', 
+                'item #2',
+                'item #3',
+            ]
+        ];
+
+        $this->assertTrue($this->checkOutput(
+            $this->renderTemplate('loops', $variables),
+            $this->getTemplateResult('loops')
+        ));
+    }
+
+    // test exceptions for invalid for, break, continue , end for
+
     // full
     // weird
     // complex

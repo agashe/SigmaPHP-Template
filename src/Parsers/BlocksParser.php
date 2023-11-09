@@ -227,6 +227,21 @@ class BlocksParser implements ParserInterface
                         $line
                     );
                 }
+                else if (preg_match(
+                    '~{% end_block ([\"|\']+){1}([a-zA-Z0-9\.]+)(\1) %}~', 
+                    $line, $matchEndTagWithBlockName)
+                ) {
+                    if (
+                        $matchEndTagWithBlockName[2] != end($currentStartTags)
+                    ) {
+                        throw new \RuntimeException(
+                            "Missing 'end_block' tag for block '" . 
+                            end($currentStartTags) . "'"
+                        );
+                    }
+
+                    $endingTag = $matchEndTagWithBlockName[0];
+                }
 
                 $blocksEndTag[] = [
                     'tag' => $endingTag,

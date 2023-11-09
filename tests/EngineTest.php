@@ -30,26 +30,45 @@ class EngineTest extends TestCase
      * Get the expected output for a template.
      *
      * @param string $name
-     * @return string
+     * @return array
      */
     private function getTemplateResult($name)
     {
-        return file_get_contents(__DIR__ . "/html/{$name}.html");
+        return explode("\n", file_get_contents(__DIR__ . "/html/{$name}.html"));
     }
 
     /**
-     * Test basic engine functionality.
+     * Get the printed output of a template.
      *
-     * @runInSeparateProcess
-     * @return void
+     * @param string $template
+     * @param array $variables
+     * @return array
      */
-    public function testBasicEngineFunctionality()
+    private function renderTemplate($template, $variables = [])
     {
-        $this->engine->render('basic', [
-            'test1' => 'TEST #1'
-        ]);
+        ob_start();
+        
+        $this->engine->render($template, $variables);
+        
+        return explode("\n", ob_get_clean());
+    }
 
-        $this->expectOutputString($this->getTemplateResult('basic'));
+    /**
+     * Compare multi lines output.
+     *
+     * @param array $actual
+     * @param array $expected
+     * @return bool
+     */
+    private function checkOutput($actual, $expected)
+    {
+        for ($i = 0;$i < count($expected);$i++) {
+            if (trim($actual[$i]) != trim($expected[$i])) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -65,10 +84,191 @@ class EngineTest extends TestCase
         $this->engine->render('not_found');
     }
 
-    // variables
-    // extend and include
-    // blocks
-    // conditions
+    /**
+     * Test basic engine's functionality.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testBasicEngineFunctionality()
+    {
+        $variables = [
+            'test1' => 'TEST #1'
+        ];
+
+        $this->assertTrue($this->checkOutput(
+            $this->renderTemplate('basic', $variables),
+            $this->getTemplateResult('basic')
+        ));
+    }
+
+    /**
+     * Test engine will through exception if the expression contains suspicious 
+     * functions like eval...etc.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testEngineWillThroughExceptionIfTheExpressionIsSuspicious()
+    {
+        $this->expectException(RuntimeException::class);
+    
+        $this->engine->render('invalid.expression');
+    }
+
+    /**
+     * Test defining variables.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testDefiningVariables()
+    {
+        $this->assertTrue($this->checkOutput(
+            $this->renderTemplate('variables'),
+            $this->getTemplateResult('variables')
+        ));
+    }
+    
+    /**
+     * Test extend and include templates.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testExtendAndIncludeTemplates()
+    {
+        $this->assertTrue($this->checkOutput(
+            $this->renderTemplate('extend.child'),
+            $this->getTemplateResult('extend')
+        ));
+    }
+
+    /**
+     * Test engine will through exception if the template we try to extend 
+     * doesn't exists.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testEngineWillThroughExceptionIfExtendedTemplateNotFound()
+    {
+        $this->expectException(RuntimeException::class);
+    
+        $this->engine->render('invalid.extend');
+    }
+
+    /**
+     * Test blocks.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testBlocks()
+    {
+        $this->assertTrue($this->checkOutput(
+            $this->renderTemplate('blocks'),
+            $this->getTemplateResult('blocks')
+        ));
+    }
+
+    /**
+     * Test engine will through exception if unmatched block's close tag.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testEngineWillThroughExceptionIfUnmatchedBlockCloseTag()
+    {
+        $this->expectException(RuntimeException::class);
+    
+        $this->engine->render('invalid.blocks.close_tag');
+    }
+   
+    /**
+     * Test engine will through exception if unmatched block's open tag.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testEngineWillThroughExceptionIfUnmatchedBlockOpenTag()
+    {
+        $this->expectException(RuntimeException::class);
+    
+        $this->engine->render('invalid.blocks.open_tag');
+    }
+    
+    /**
+     * Test engine will through exception if unmatched block's tag labels.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testEngineWillThroughExceptionIfUnmatchedBlockTagLabels()
+    {
+        $this->expectException(RuntimeException::class);
+    
+        $this->engine->render('invalid.blocks.tag_labels');
+    }
+    
+    /**
+     * Test engine will through exception if unmatched inline block's close tag.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testEngineThroughExceptionIfUnmatchedInlineBlockCloseTag()
+    {
+        $this->expectException(RuntimeException::class);
+    
+        $this->engine->render('invalid.blocks.inline.close_tag');
+    }
+   
+    /**
+     * Test engine will through exception if unmatched inline block's open tag.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testEngineThroughExceptionIfUnmatchedInlineBlockOpenTag()
+    {
+        $this->expectException(RuntimeException::class);
+    
+        $this->engine->render('invalid.blocks.inline.open_tag');
+    }
+    
+    /**
+     * Test engine will through exception if unmatched inline block's tag 
+     * labels.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testEngineThroughExceptionIfUnmatchedInlineBlockTagLabels()
+    {
+        $this->expectException(RuntimeException::class);
+    
+        $this->engine->render('invalid.blocks.inline.tag_labels');
+    }
+
+    /**
+     * Test conditions.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testConditions()
+    {
+        $variables = [
+            'test1' => 'TEST #1'
+        ];
+
+        $this->assertTrue($this->checkOutput(
+            $this->renderTemplate('conditions', $variables),
+            $this->getTemplateResult('conditions')
+        ));
+    }
+
     // loops
     // full
     // weird

@@ -434,6 +434,9 @@ class ConditionsParser implements ParserInterface
                 }
             }
         }
+
+        // remove all processed inline conditions
+        $this->inlineConditions = [];
     }
 
     /**
@@ -873,6 +876,9 @@ class ConditionsParser implements ParserInterface
                 }
             }
         }
+
+        // remove all processed conditions
+        $this->conditions = [];
     }
 
     /**

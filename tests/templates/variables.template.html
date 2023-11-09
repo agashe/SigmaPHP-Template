@@ -1,0 +1,17 @@
+{% define $x = 10 %}
+
+{{ $x }}
+{{ gettype($x) }}
+
+{%              define              $y            =               "test"                      %}
+
+{{ $y }}
+{{ gettype($y) }}
+
+{%define $z = 10.5%}
+{{ $z }}
+{{ gettype($z) }}
+
+{% define $arr = ["item #1", "item #2", "item #3"] %}
+{{ $arr[1] }}
+{{ gettype($arr) }}

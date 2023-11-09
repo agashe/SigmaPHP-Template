@@ -14,8 +14,7 @@
 {{ strtolower('TEST TEXT') }}
 
 {-- #4 : Test html tags  --}
-<b>{{ date('Y-m-d') }} <i>{-- This souldn't be printed --}</i></b>
-<p>{{ ($test1 == 'TEST #1') ? md5($test1) : '' }}</p>
+<p>{{ ($test1 == 'TEST #1') ? md5($test1) : '' }}<b><i>{-- This souldn't be printed --}</i></b></p>
 
 {-- #5 : Test ternary operator  --}
 <h1>{{ isset($unknown) ? 'yes' : 'no' }}</h1>

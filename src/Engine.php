@@ -244,8 +244,8 @@ class Engine implements EngineInterface
                 // reach 0 if all the commands are valid , otherwise it 
                 // will throw exception
                 foreach ($validCommands as $command) {
-                    if (preg_match($command, $line)) {
-                        $commandsCount -= 1;
+                    if (preg_match_all($command, $line, $matches)) {
+                        $commandsCount -= count($matches[0]);
                     }
                 }
 

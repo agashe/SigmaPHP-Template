@@ -39,7 +39,9 @@ class ExpressionEvaluator implements ExpressionEvaluatorInterface
     {
         // check is the expression is safe.
         foreach (self::$blackList as $keyword) {
-            if (preg_match("~^$keyword$~", $expression)) {
+            preg_match_all('~^' . $keyword . '$~', $expression, $matches);
+
+            if (!empty($matches[0])) {
                 throw new \RuntimeException(
                     "Invalid expression : {$expression}"
                 );

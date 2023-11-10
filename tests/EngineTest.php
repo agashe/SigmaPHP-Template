@@ -62,6 +62,7 @@ class EngineTest extends TestCase
      */
     private function checkOutput($actual, $expected)
     {
+        
         for ($i = 0;$i < count($actual);$i++) {
             if (!isset($expected[$i]) ||
                 trim($actual[$i]) != trim($expected[$i])
@@ -245,24 +246,23 @@ class EngineTest extends TestCase
      * @runInSeparateProcess
      * @return void
      */
-    // public function testFullTemplate()
-    // {
-        // Need multiple expression on the same line !!!!!!!!!!!
-        // $variables = [
-        //     'appName' => 'Testing',
-        //     'message' => 'Your app is working as expected',
-        //     'navLinks' => [
-        //         ['name' => 'home', 'url' => '/path/to/home'],
-        //         ['name' => 'contact', 'url' => '/path/to/contact'],
-        //         ['name' => 'about', 'url' => '/path/to/about'],
-        //     ]
-        // ];
+    public function testFullTemplate()
+    {
+        $variables = [
+            'appName' => 'Testing',
+            'message' => 'Your app is working as expected',
+            'navLinks' => [
+                ['name' => 'home', 'url' => '/path/to/home'],
+                ['name' => 'contact', 'url' => '/path/to/contact'],
+                ['name' => 'about', 'url' => '/path/to/about'],
+            ]
+        ];
         
-        // $this->assertTrue($this->checkOutput(
-        //     $this->renderTemplate('full.app', $variables),
-        //     $this->getTemplateResult('app')
-        // ));
-    // }
+        $this->assertTrue($this->checkOutput(
+            $this->renderTemplate('full.app', $variables),
+            $this->getTemplateResult('app')
+        ));
+    }
 
     /**
      * Test weird template syntax.

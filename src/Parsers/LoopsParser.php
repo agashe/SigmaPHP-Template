@@ -85,18 +85,10 @@ class LoopsParser implements ParserInterface
             $this->content[$loop['start']['line']]
         );
 
-        if (preg_match('~{{[^{}]+}}~', $lineParts[1], $match)) {
-            $expression = trim(str_replace(['{{', '}}'], '', $match[0]));
-            
-            $result = ExpressionEvaluator::execute(
-                $expression, 
+        if (preg_match('~{{[^{}]+}}~', $lineParts[1])) {
+            $loopBody[] = ExpressionEvaluator::executeLine(
+                $lineParts[1], 
                 $this->data
-            );
-            
-            $loopBody[] = str_replace(
-                $match[0],
-                $result,
-                $lineParts[1]
             );
         } else {
             $loopBody[] = $lineParts[1];
@@ -109,19 +101,11 @@ class LoopsParser implements ParserInterface
         ) {
             // process variables and expressions
             if (!$hasInnerLoop && preg_match('~{{[^{}]+}}~',
-                $this->content[$i], $match)
+                $this->content[$i])
             ) {
-                $expression = trim(str_replace(['{{', '}}'], '', $match[0]));
-                
-                $result = ExpressionEvaluator::execute(
-                    $expression, 
+                $loopBody[] = ExpressionEvaluator::executeLine(
+                    $this->content[$i], 
                     $this->data
-                );
-                
-                $loopBody[] = str_replace(
-                    $match[0],
-                    $result,
-                    $this->content[$i]
                 );
             } else {
                 if (preg_match('~{% break \((.*?)\) \<([0-9]+)\> %}~',
@@ -176,18 +160,10 @@ class LoopsParser implements ParserInterface
             $this->content[$loop['end']['line']]
         );
         
-        if (preg_match('~{{[^{}]+}}~', $lineParts[0], $match)) {
-            $expression = trim(str_replace(['{{', '}}'], '', $match[0]));
-            
-            $result = ExpressionEvaluator::execute(
-                $expression, 
+        if (preg_match('~{{[^{}]+}}~', $lineParts[0])) {
+            $loopBody[] = ExpressionEvaluator::executeLine(
+                $lineParts[0], 
                 $this->data
-            );
-            
-            $loopBody[] = str_replace(
-                $match[0],
-                $result,
-                $lineParts[0]
             );
         } else {
             $loopBody[] = $lineParts[0];
@@ -680,31 +656,13 @@ class LoopsParser implements ParserInterface
                 }
                 
                 // process expressions
-                preg_match_all(
-                    '~{{[^{}]+}}~',
-                    $loopBodyWithoutNestedLoops,
-                    $matches
-                );
-
                 $updatedLoopBody = '';
 
-                if (!empty($matches[0])) {
-                    foreach ($matches as $match) {
-                        $expression = trim(
-                            str_replace(['{{', '}}'], '', $match[0])
-                        );
-                        
-                        $result = ExpressionEvaluator::execute(
-                            $expression, 
-                            $this->data
-                        );
-                        
-                        $updatedLoopBody = str_replace(
-                            $match[0],
-                            ' ' . $result . ' ',
-                            $loopBlock
-                        );
-                    }
+                if (preg_match('~{{[^{}]+}}~',$loopBodyWithoutNestedLoops)) {
+                    $updatedLoopBody = ExpressionEvaluator::executeLine(
+                        $loopBlock, 
+                        $this->data
+                    );
                 } else {
                     $updatedLoopBody = ' ' . $loopBlock . ' ';
                 }

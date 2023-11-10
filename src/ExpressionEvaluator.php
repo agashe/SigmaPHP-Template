@@ -71,4 +71,72 @@ class ExpressionEvaluator implements ExpressionEvaluatorInterface
         
         return $result;
     }
+
+    /**
+     * Execute all expressions in a line and return the result.
+     * 
+     * @param string $line
+     * @param array $data
+     * @return mixed
+     */
+    public static function executeLine($line, $data = [])
+    {
+        $lineExpressions = explode('{{', $line);
+        unset($lineExpressions[0]);
+
+        $lineExpressions = array_map(function ($expression) {
+            return '{{' . $expression;
+        }, $lineExpressions);
+        
+        foreach ($lineExpressions as $lineExpression) {
+            preg_match('~{{[^{}]+}}~', $lineExpression, $matchExpression);
+            
+            if (empty($matchExpression[0])) {
+                continue;
+            }
+
+            $expression = trim(str_replace(['{{', '}}'], '', 
+                $matchExpression[0]));
+            
+            // check is the expression is safe.        
+            $expressionFiltered = preg_replace([
+                '~([\"|\'\`]+)(.*?)(\1)~',
+                '~\$([a-zA-Z0-9_]+)~'
+            ], '', $expression);
+            
+            foreach (self::$blackList as $keyword) {
+                if (strpos($expressionFiltered, $keyword) !== false) {
+                    throw new \RuntimeException(
+                        "Invalid expression : ({$expression})"
+                    );
+                }
+            }
+            
+            extract($data);
+
+            // check if all variables are defined , since eval() will only
+            // throw (Warning) if the variable is not defined !!
+            $matches = [];
+            preg_match_all('~\$([a-zA-Z0-9_]+)~', $expression, $matches);
+
+            foreach ($matches[1] as $match) {
+                if (!isset(${$match})) {
+                    throw new \RuntimeException(
+                        "Undefined variable : $$match"
+                    );
+                }
+            }
+
+            $result = '';
+            eval("\$result = $expression;");
+            
+            $line = str_replace(
+                $matchExpression[0],
+                ' ' . $result . ' ',
+                $line
+            );
+        }
+
+        return $line;
+    }
 }

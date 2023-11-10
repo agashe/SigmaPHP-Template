@@ -438,13 +438,11 @@ class Engine implements EngineInterface
             
             // process variables and expressions
             if (preg_match('~{{[^{}]+}}~', $line, $match)) {
-                $expression = trim(str_replace(['{{', '}}'], '', $match[0]));
-                $result = ExpressionEvaluator::execute(
-                    $expression, 
+                $line = ExpressionEvaluator::executeLine(
+                    $line, 
                     $this->data
                 );
 
-                $line = str_replace($match[0], $result, $line);
                 $this->content[$i] = $line;
 
                 $updatedContent[] = $line;

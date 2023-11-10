@@ -1,0 +1,97 @@
+{% for $i in 5 %} 
+    {% block 'test2' %} {% define $j = 10 %} {% define $k = 10 %} test {{ $j * $k }} {% end_block %}
+    lol
+    {% show_block 'test2' %} blablabla
+    lolololo
+{% end_for %}
+
+{% block 'test' %}
+    {% for $i in 6 %}
+        {% if ($i % 2 == 0) %}
+            even : {{ $i }}
+        {% else_if ($i % 2 != 0) %}
+            odd : {{ $i }}
+        {% end_if %}
+    {% end_for %}
+{% end_block %}
+
+{% show_block 'test' %}
+
+{% block 'foo' %}
+    This is foo 
+{% end_block %}
+
+{% block 'foo' %}
+    This is foo too 
+{% end_block %}
+{% block 'foo' %}
+    This is foo too 
+{% end_block %}
+{% block 'foo' %}
+    This is foo too 
+{% end_block %}
+{% block 'foo' %}
+    This is foo too 
+{% end_block %}
+{% block 'foo' %}
+    This is foo too 
+{% end_block %}
+{% block 'foo' %}
+    This is foo too 
+{% end_block %}
+{% block 'foo' %}
+    This is foo too 
+{% end_block %}
+{% block 'foo' %}
+    good work
+{% end_block %}
+
+{% show_block 'foo' %}
+
+
+{% define $studentGrades = [10, 50, 80, 67, 22] %}
+
+{% for $grade in $studentGrades %}
+    {% if ($grade >= 90) %}
+        Excellent
+    {% else_if ($grade >= 80 && $grade < 90) %}
+        Very Good
+    {% else_if ($grade >= 70 && $grade < 80) %}
+        Very Good
+    {% else_if ($grade >= 60 && $grade < 70) %}
+        Good
+    {% else %} 
+        Fail
+    {% end_if %}
+{% end_for %}
+
+{% block 'parent' %}
+    This is parent block 
+
+    {% block 'child' %}
+        This is child block 
+    {% end_block %}
+{% end_block %}
+
+{% show_block 'child' %}
+
+
+{% for $i in 2 %}
+    {% for $j in 2 %}
+        {% for $k in 2 %}
+            {{ $i * $j * $k }}
+        {% end_for %}
+    {% end_for %}
+{% end_for %}
+
+{% if ($foo == 'ahmed') %}
+    {% if ($foo == 'ahmed') %}
+        {% if ($foo == 'ahmed') %}
+            {% if ($foo == 'ahmed') %}
+                {% if ($foo == 'ahmed') %}
+                    GOOD
+                {% end_if %}
+            {% end_if %}
+        {% end_if %}
+    {% end_if %}
+{% end_if %}

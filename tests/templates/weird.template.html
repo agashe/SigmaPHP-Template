@@ -1,0 +1,101 @@
+Let's also check for condition block {% if (1) %} Line 1
+TEST 
+Bo {% else_if (0)%} test else if is wokring
+another thing
+Booo{% else%} test else is wokring
+something
+Line 2{% end_if%} , does it respect the line ?
+
+
+Let's also check for condition block {% if (0) %} Line 1
+TEST
+Booo{% else %} test else is wokring
+something
+Line 2{% end_if%} , does it respect the line ?
+
+
+Let's also check for condition block {% if (0) %} Line 1
+TEST 
+Bo {% else_if (1)%} test else if is wokring
+another thing
+Boo {% else_if (0)%} test second else if is wokring
+another thing
+Booo{% else%} test else is wokring
+something
+Line 2{% end_if%} , does it respect the line ?
+
+
+Let's also check for condition block {% if (0) %} Line 1
+TEST 
+Bo {% else_if (0)%} test else if is wokring
+another thing
+Boo {% else_if (1)%} test second else if is wokring
+another thing
+Booo{% else%} test else is wokring
+something
+Line 2{% end_if%} , does it respect the line ?
+
+Let's also check for condition block {% if (1) %} Line 1
+TEST 
+Bo {% else%} test else is wokring
+something
+Line 2{% end_if%} , does it respect the line ?
+
+Let's also check for condition block {% if (1) %} Line 1
+TEST 
+Line 2{% end_if%} , does it respect the line ?
+
+
+{% block 'test1' %} TEST #1 {% end_block 'test1' %}
+
+Let's also check if inline blocks {% show_block 'test1' %} , does it respect the line ?
+
+
+LOL {% block 'test2' %} TEST #2 OPEN :
+    TEST #2
+TEST #2 CLOSE {% end_block 'test2' %} LOL9
+
+Let's also check if blocks {% show_block 'test2' %} , does it respect the line ?
+
+{% show_block 'test2' %}
+
+Let's also check for inline condition {% if (1) %} TEST {% end_if%} , does it respect the line ?
+Let's also check for inline loop {% for $i in 3 %} TEST {% end_for%} , does it respect the line ?
+
+Let's also check for condition block {% if (1) %} 
+TEST 
+
+{% end_if%} , does it respect the line ?
+
+Let's also check for loop block {% for $i in 3 %} 
+TEST 
+{% end_for%} , does it respect the line ?
+
+Let's also check for loop block {% for $i in 3 %}
+TEST
+{% end_for%} , does it respect the line ?
+
+Let's also check for loop block {% for $i in 3 %} {{$i}}
+TEST 
+{% end_for%} , does it respect the line ?
+
+Let's also check for loop block {% for $i in 3 %}
+TEST {%continue ($i == 2)%}
+{% end_for%} , does it respect the line ?
+
+Let's also check for loop block {% for $i in 3 %} {{$i}}
+TEST {%break ($i == 2)%} AFTER
+{% end_for%} , does it respect the line ?
+
+Let's also check for loop block {% for $i in 3 %} after
+TEST
+before {% end_for%} , does it respect the line ?
+
+Let's also check for loop block {% for $i in 3 %} {%define $PI=3.14%}
+TEST {{ $i * $PI}}
+{% end_for%} , does it respect the line ?
+
+Let's also check for loop block {% for $i in 3 %} {% block 'test' %} BLOCK
+{% end_block %} TEST {% if ($i == 2)%}{% show_block 'test' %}
+{%end_if%} after condition
+{% end_for%} , does it respect the line ?

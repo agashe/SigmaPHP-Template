@@ -18,7 +18,7 @@ class ExpressionEvaluator implements ExpressionEvaluatorInterface
     private static $blackList = [
         '__halt_compiler', 'abstract', 'and', 'array', 'as', 'break', 
         'callable', 'case', 'catch', 'class', 'clone', 'const', 'continue', 
-        'declare', 'default', 'die', 'do', 'echo', 'else', 'elseif', 'empty', 
+        'declare', 'default', 'die', 'do', 'echo', 'else', 'elseif', 
         'enddeclare', 'endfor', 'endforeach', 'endif', 'endswitch', 'endwhile',
         'eval', 'exit', 'extends', 'final', 'for', 'foreach', 'function', 
         'global', 'goto', 'if', 'implements', 'include', 'include_once', 
@@ -39,7 +39,8 @@ class ExpressionEvaluator implements ExpressionEvaluatorInterface
     {
         // check is the expression is safe.        
         $expressionFiltered = preg_replace([
-            '~([\"|\'\`]+)(.*?)(\1)~'
+            '~([\"|\'\`]+)(.*?)(\1)~',
+            '~\$([a-zA-Z0-9_]+)~'
         ], '', $expression);
 
         foreach (self::$blackList as $keyword) {

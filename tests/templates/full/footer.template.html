@@ -1,0 +1,15 @@
+<footer>
+    <div class="footer-top">
+        {% include 'full.button' %}
+    </div>
+    <div class="footer-content">
+        <ul class=”socials”>
+            {% for $platform in ['facebook', 'twitter', 'youtube'] %}
+                <li><a href="#"><i class="fa fa-{{$platform}}"></i></a></li>
+            {% end_for %}
+         </ul>
+    </div>
+    <div class="footer-bottom">
+        <b>{{ "{$appName} (C) All Rights Reserved " . date('Y') }}</b>
+    </div>
+</footer>

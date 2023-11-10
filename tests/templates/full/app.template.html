@@ -1,0 +1,23 @@
+{% extend 'full.base' %}
+
+{% block 'title' %} HomePage {% end_block %}
+
+{% block 'content' %}
+    <!-- Alert Message -->
+    {% if (!empty($message)) %}
+    {% include 'full.alert' %}
+    {% end_if %}
+    <!-- Alert Message -->
+
+    <article>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
+        Sed vehicula porttitor velit sollicitudin porttitor. 
+        Phasellus sit amet euismod dolor.
+    </article>
+{% end_block 'content' %}
+
+{-- JS SECTION --}
+{% block 'js' %}
+    <script src="app.js"></script>
+{% end_block %}
+{-- JS SECTION --}

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ $appName }} - {% show_block 'title' %}</title>
+</head>
+<body>
+    {% include 'full.header' %}
+    
+    {% show_block 'content' %}
+
+    {% include 'full.footer' %}
+
+    {-- JS SECTION --}
+    {% block 'js' %}
+        <script src="base.js"></script>
+    {% end_block %}
+    
+    {% show_block 'js' %}
+    {-- JS SECTION --}
+</body>
+</html>

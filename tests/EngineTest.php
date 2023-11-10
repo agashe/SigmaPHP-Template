@@ -118,12 +118,12 @@ class EngineTest extends TestCase
 
             'invalid.loops.close_tag',
             'invalid.loops.open_tag',
-            // 'invalid.loops.break_tag',
-            // 'invalid.loops.continue_tag',
+            'invalid.loops.break_tag',
+            'invalid.loops.continue_tag',
             'invalid.loops.inline.close_tag',
             'invalid.loops.inline.open_tag',
-            // 'invalid.loops.inline.break_tag',
-            // 'invalid.loops.inline.continue_tag',
+            'invalid.loops.inline.break_tag',
+            'invalid.loops.inline.continue_tag',
         ];
 
         foreach ($invalidTemplates as $invalidTemplate) {
@@ -239,7 +239,66 @@ class EngineTest extends TestCase
         ));
     }
 
-    // full
-    // weird
-    // complex
+    /**
+     * Test full processing for a template.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    // public function testFullTemplate()
+    // {
+        // Need multiple expression on the same line !!!!!!!!!!!
+        // $variables = [
+        //     'appName' => 'Testing',
+        //     'message' => 'Your app is working as expected',
+        //     'navLinks' => [
+        //         ['name' => 'home', 'url' => '/path/to/home'],
+        //         ['name' => 'contact', 'url' => '/path/to/contact'],
+        //         ['name' => 'about', 'url' => '/path/to/about'],
+        //     ]
+        // ];
+        
+        // $this->assertTrue($this->checkOutput(
+        //     $this->renderTemplate('full.app', $variables),
+        //     $this->getTemplateResult('app')
+        // ));
+    // }
+
+    /**
+     * Test weird template syntax.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testWeirdTemplate()
+    {
+        $this->assertTrue($this->checkOutput(
+            $this->renderTemplate('weird'),
+            $this->getTemplateResult('weird')
+        ));
+    }
+
+    /**
+     * Test complex template.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testComplexTemplate()
+    {
+        $variables = [
+            'foo' => 'ahmed',
+            'boo' => 'ali',
+            'items' => [
+                'item #1', 
+                'item #2',
+                'item #3',
+            ],
+        ];
+
+        $this->assertTrue($this->checkOutput(
+            $this->renderTemplate('complex', $variables),
+            $this->getTemplateResult('complex')
+        ));
+    }
 }

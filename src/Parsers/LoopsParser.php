@@ -857,6 +857,13 @@ class LoopsParser implements ParserInterface
             }
 
             if (strpos($line, '{% end_for %}') !== false) {
+                if (!isset($loopStartTag[end($currentStartTags)])) {
+                    throw new \RuntimeException(
+                        "'end_for' used without an loop " .
+                        "in template [{$this->template}]"
+                    );
+                }
+
                 $endingTag = "{% end_for " . end($currentStartTags) . " %}";
                 
                 $this->content[$i] = str_replace(
@@ -1144,7 +1151,11 @@ class LoopsParser implements ParserInterface
     private function noMoreLoops()
     {
         foreach ($this->content as $line) {
-            if (strpos($line, '{% for') !== false) {
+            if (strpos($line, '{% for') !== false ||
+                strpos($line, '{% break') !== false ||
+                strpos($line, '{% continue') !== false ||
+                strpos($line, '{% end_for') !== false
+            ) {
                 return false;
             }
         }

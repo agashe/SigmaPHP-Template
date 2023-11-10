@@ -243,9 +243,15 @@ class Engine implements EngineInterface
                 // loop until all commands are counted , the counter will 
                 // reach 0 if all the commands are valid , otherwise it 
                 // will throw exception
+                $lineCommands = array_map(function ($line) {
+                    return '{%' . $line;
+                }, explode('{%', $line));
+
                 foreach ($validCommands as $command) {
-                    if (preg_match_all($command, $line, $matches)) {
-                        $commandsCount -= count($matches[0]);
+                    foreach ($lineCommands as $lineCommand) {
+                        if (preg_match($command, $lineCommand)) {
+                            $commandsCount -= 1;
+                        }
                     }
                 }
 
@@ -303,8 +309,8 @@ class Engine implements EngineInterface
         $isBlankLine = false;
         $recheck = false;
 
-        $this->cleanTemplate();
         $this->removeComments();
+        $this->cleanTemplate();
         $this->defineVariables();
         
         // in case the first line of the template was 'extend'

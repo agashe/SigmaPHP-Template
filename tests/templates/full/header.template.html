@@ -1,0 +1,12 @@
+<header>
+    <a href="{{ $navLinks[0]['url'] }}" class="logo">{{ $appName }}</a>
+    <div class="navigation-links">
+        <ul class="list">
+            {% for $link in $navLinks %}
+                <li>
+                    <a {%if ($link['name'] == 'home')%}class="active"{%end_if%} href="{{ $link['url'] }}">{{ $link['name'] }}</a>
+                </li>
+            {% end_for %}
+        </ul>
+    </div>
+</header>

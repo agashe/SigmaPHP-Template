@@ -1,11 +1,11 @@
-{% extend 'full.base' %}
+{% extend './base' %}
 
 {% block 'title' %} HomePage {% end_block %}
 
 {% block 'content' %}
     <!-- Alert Message -->
     {% if (!empty($message)) %}
-    {% include 'full.alert' %}
+        {% include './alert' %}
     {% end_if %}
     <!-- Alert Message -->
 

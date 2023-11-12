@@ -141,6 +141,20 @@ class EngineTest extends TestCase
     }
 
     /**
+     * Test include and extend by relative path.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testIncludeAndExtendByRelativePath()
+    {
+        $this->assertTrue($this->checkOutput(
+            $this->renderTemplate('./relative.sectionA'),
+            $this->getTemplateResult('relative')
+        ));
+    }
+
+    /**
      * Test basic engine's functionality.
      *
      * @runInSeparateProcess

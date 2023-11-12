@@ -20,8 +20,16 @@ class Engine implements EngineInterface
 
     /**
      * @var string $templatesPath
+     * The root path for all template files.
      */
     private $templatesPath;
+    
+    /**
+     * @var string $currentTemplatePath
+     * Current template under processing , useful for
+     * include and extend by relative path.
+     */
+    private $currentTemplatePath;
 
     /**
      * @var string $template
@@ -71,6 +79,11 @@ class Engine implements EngineInterface
      */
     public function render($template, $data = [])
     {
+        // in case the developer used './' with the render method
+        // we remove it since it points to the relative base path
+        // which in this case the path to templates  
+        $template = str_replace('./', '', $template);
+
         $this->content = $this->getTemplateContent($template);
         $this->data = $data;
 
@@ -81,6 +94,22 @@ class Engine implements EngineInterface
         $this->blocksParser->blocks = [];
         $this->conditionsParser->conditions = [];
         $this->conditionsParser->inlineConditions = [];
+        $this->loopsParser->loops = [];
+        $this->loopsParser->inlineLoops = [];
+
+        // get the current template path
+        $this->currentTemplatePath = $this->templatesPath;
+
+        if (strpos($template, '.') !== false) {
+            $this->currentTemplatePath = explode('.', $template);
+            
+            unset($this->currentTemplatePath[
+                count($this->currentTemplatePath) - 1
+            ]);
+
+            $this->currentTemplatePath = implode('.', 
+                $this->currentTemplatePath);
+        }
 
         $this->template = $template . '.' .
             self::TEMPLATE_FILE_EXTENSION;
@@ -98,6 +127,15 @@ class Engine implements EngineInterface
      */
     private function getTemplateContent($templateFileName)
     {
+        // set the current path
+        if (strpos($templateFileName, './') !== false) {
+            $templateFileName = str_replace(
+                './', 
+                $this->currentTemplatePath . '.',
+                $templateFileName
+            );
+        }
+
         // in case the template is in a sub-directory
         // we use dot-notation , but it's just the matter of
         // replace the dots with slashes to get the correct path 
@@ -106,7 +144,7 @@ class Engine implements EngineInterface
         $templateFullPath = $this->templatesPath . '/' .
             $templateFileName . '.' .
             self::TEMPLATE_FILE_EXTENSION;
-
+        
         if (!file_exists($templateFullPath)) {
             throw new \RuntimeException(
                 "The requested template [{$templateFileName}.template.html] " .
@@ -217,8 +255,8 @@ class Engine implements EngineInterface
                 $commandsCount = count($matches[0]);
 
                 $validCommands = [
-                    '~{% extend ([\"|\']+){1}([a-zA-Z0-9\.]+)(\1) %}~',
-                    '~{% include ([\"|\']+){1}([a-zA-Z0-9\.]+)(\1) %}~',
+                    '~{% extend ([\"|\']+){1}([a-zA-Z0-9\.\/]+)(\1) %}~',
+                    '~{% include ([\"|\']+){1}([a-zA-Z0-9\.\/]+)(\1) %}~',
                     '~{% show_block ([\"|\']+){1}([a-zA-Z0-9\.]+)(\1) %}~',
                     '~{% block ([\"|\']+){1}([a-zA-Z0-9\.]+)(\1) %}~', 
                     '~{% end_block %}~', 
@@ -316,7 +354,7 @@ class Engine implements EngineInterface
         // in case the first line of the template was 'extend'
         // we need to handle it before any further processing 
         // on the template
-        if (preg_match('~{% extend ([\"|\']+){1}([a-zA-Z0-9\.]+)(\1) %}~',
+        if (preg_match('~{% extend ([\"|\']+){1}([a-zA-Z0-9\.\/]+)(\1) %}~',
             $this->content[0], $match)
         ) {
             // remove the 'extend' directive
@@ -375,7 +413,7 @@ class Engine implements EngineInterface
             }
             
             // handle extend template case
-            if (preg_match('~{% extend ([\"|\']+){1}([a-zA-Z0-9\.]+)(\1) %}~',
+            if (preg_match('~{% extend ([\"|\']+){1}([a-zA-Z0-9\.\/]+)(\1) %}~',
                 $line, $match))
             {
                 $updatedContent = array_merge(
@@ -387,7 +425,7 @@ class Engine implements EngineInterface
             }
 
             // handle include template case
-            if (preg_match('~{% include ([\"|\']+)([a-zA-Z0-9\.]+)(\1) %}~',
+            if (preg_match('~{% include ([\"|\']+)([a-zA-Z0-9\.\/]+)(\1) %}~',
                 $line, $match))
             {
                 $updatedContent = array_merge(

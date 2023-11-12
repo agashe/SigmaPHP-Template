@@ -15,4 +15,13 @@ interface EngineInterface
      * @return void
      */
     public function render($template, $data = []);
+
+    /**
+     * Register custom directive.
+     * 
+     * @param string $name
+     * @param callable $callback
+     * @return void
+     */
+    public function registerCustomDirective($name, $callback);
 }

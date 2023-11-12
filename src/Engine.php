@@ -62,12 +62,18 @@ class Engine implements EngineInterface
     private $loopsParser;
 
     /**
+     * @var array $customDirectives
+     */
+    private $customDirectives;
+
+    /**
      * Template Engine Constructor.
      * 
      * @param string $templatesPath
      */
     public function __construct($templatesPath = '') {
         $this->templatesPath = $templatesPath;
+        $this->customDirectives = [];
     }
 
     /**
@@ -117,6 +123,18 @@ class Engine implements EngineInterface
         while ($this->processTemplate());
                         
         print implode("\n", $this->content);
+    }
+
+    /**
+     * Render template.
+     * 
+     * @param string $name
+     * @param callable $callback
+     * @return void
+     */
+    public function registerCustomDirective($name, $callback)
+    {
+        $this->customDirectives[$name] = $callback;
     }
 
     /**
@@ -275,7 +293,8 @@ class Engine implements EngineInterface
                     '~{% break \((.*?)\) \<([0-9]+)\> %}~',
                     '~{% continue \((.*?)\) \<([0-9]+)\> %}~',
                     '~{% end_for ([0-9]+) %}~', 
-                    '~{% end_for %}~'
+                    '~{% end_for %}~',
+                    '~{%\s*([a-zA-Z0-9\_]+)\((.*?)\)\s*%}~'
                 ];
 
                 // loop until all commands are counted , the counter will 
@@ -479,6 +498,41 @@ class Engine implements EngineInterface
                 $line = ExpressionEvaluator::executeLine(
                     $line, 
                     $this->data
+                );
+
+                $this->content[$i] = $line;
+
+                $updatedContent[] = $line;
+            }
+            
+            // process variables and expressions
+            if (preg_match('~{%\s*([a-zA-Z0-9\_]+)\((.*?)\)\s*%}~',
+                $line, $match)
+            ) {
+                if (!isset($this->customDirectives[$match[1]])) {
+                    throw new \RuntimeException(
+                        "Undefined directive [{$match[1]}] " .
+                        "in template [{$this->template}]"
+                    );
+                }
+
+                if (isset($match[2]) && !empty($match[2])) {
+                    $arguments = explode(',', $match[2]);
+
+                    $arguments = array_map(function ($argument) {
+                        return ExpressionEvaluator::execute($argument);
+                    }, $arguments);
+                }
+
+                $result = call_user_func(
+                    $this->customDirectives[$match[1]],
+                    ...$arguments
+                );
+
+                $line = str_replace(
+                    $match[0],
+                    ' ' . $result . ' ',
+                    $line
                 );
 
                 $this->content[$i] = $line;

@@ -315,4 +315,41 @@ class EngineTest extends TestCase
             $this->getTemplateResult('complex')
         ));
     }
+
+    /**
+     * Test custom directives.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testCustomDirectives()
+    {
+        $this->engine->registerCustomDirective('add', function (...$numbers) {
+            $sum = 0;
+
+            foreach ($numbers as $number) {
+                $sum += $number;
+            }
+
+            return $sum;
+        });
+
+        $this->assertTrue($this->checkOutput(
+            $this->renderTemplate('directives'),
+            $this->getTemplateResult('directives')
+        ));
+    }
+
+    /**
+     * Test engine through exception if the custom directive doesn't exists.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function TestEngineThroughExceptionIfCustomDirectiveDoesNotExists()
+    {
+        $this->expectException(RuntimeException::class);
+    
+        $this->engine->render('invalid.directives');
+    }
 }

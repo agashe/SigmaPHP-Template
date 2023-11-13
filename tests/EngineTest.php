@@ -75,19 +75,6 @@ class EngineTest extends TestCase
     }
 
     /**
-     * Test engine will through exception if the template doesn't exists.
-     *
-     * @runInSeparateProcess
-     * @return void
-     */
-    public function testEngineWillThroughExceptionIfTheTemplateDoesNotExists()
-    {
-        $this->expectException(RuntimeException::class);
-    
-        $this->engine->render('not_found');
-    }
-
-    /**
      * Test invalid templates.
      *
      * @runInSeparateProcess
@@ -98,40 +85,52 @@ class EngineTest extends TestCase
         $exceptionsCount = 0;
 
         $invalidTemplates = [
-            'invalid.expression',
-            'invalid.extend',
+            'invalid.not_found' => 'TemplateNotFoundException',
+            'invalid.statement' => 'InvalidStatementException',
+            'invalid.expression' => 'InvalidExpressionException',
+            'invalid.extend' => 'TemplateNotFoundException',
+            'invalid.directives' => 'UndefinedDirectiveException',
             
-            'invalid.blocks.close_tag',
-            'invalid.blocks.open_tag',
-            'invalid.blocks.tag_labels',
-            'invalid.blocks.inline.close_tag',
-            'invalid.blocks.inline.open_tag',
-            'invalid.blocks.inline.tag_labels',
+            'invalid.blocks.close_tag' => 'TemplateParsingException',
+            'invalid.blocks.open_tag' => 'TemplateParsingException',
+            'invalid.blocks.tag_labels' => 'TemplateParsingException',
 
-            'invalid.conditions.close_tag',
-            'invalid.conditions.open_tag',
-            'invalid.conditions.else_if_tag',
-            'invalid.conditions.else_tag',
-            'invalid.conditions.inline.close_tag',
-            'invalid.conditions.inline.open_tag',
-            'invalid.conditions.inline.else_if_tag',
-            'invalid.conditions.inline.else_tag',
+            'invalid.blocks.inline.close_tag' => 'TemplateParsingException',
+            'invalid.blocks.inline.open_tag' => 'TemplateParsingException',
+            'invalid.blocks.inline.tag_labels' => 'TemplateParsingException',
 
-            'invalid.loops.close_tag',
-            'invalid.loops.open_tag',
-            'invalid.loops.break_tag',
-            'invalid.loops.continue_tag',
-            'invalid.loops.inline.close_tag',
-            'invalid.loops.inline.open_tag',
-            'invalid.loops.inline.break_tag',
-            'invalid.loops.inline.continue_tag',
+            'invalid.conditions.close_tag' => 'TemplateParsingException',
+            'invalid.conditions.open_tag' => 'TemplateParsingException',
+            'invalid.conditions.else_if_tag' => 'TemplateParsingException',
+            'invalid.conditions.else_tag' => 'TemplateParsingException',
+
+            'invalid.conditions.inline.close_tag' => 'TemplateParsingException',
+            'invalid.conditions.inline.open_tag' => 'TemplateParsingException',
+            'invalid.conditions.inline.else_if_tag' =>
+                'TemplateParsingException',
+            'invalid.conditions.inline.else_tag' => 'TemplateParsingException',
+
+            'invalid.loops.close_tag' => 'TemplateParsingException',
+            'invalid.loops.open_tag' => 'TemplateParsingException',
+            'invalid.loops.break_tag' => 'TemplateParsingException',
+            'invalid.loops.continue_tag' => 'TemplateParsingException',
+            'invalid.loops.invalid_expression' => 'InvalidExpressionException',
+
+            'invalid.loops.inline.close_tag' => 'TemplateParsingException',
+            'invalid.loops.inline.open_tag' => 'TemplateParsingException',
+            'invalid.loops.inline.break_tag' => 'TemplateParsingException',
+            'invalid.loops.inline.continue_tag' => 'TemplateParsingException',
+            'invalid.loops.inline.invalid_expression' =>
+                'InvalidExpressionException',
         ];
 
-        foreach ($invalidTemplates as $invalidTemplate) {
+        foreach ($invalidTemplates as $invalidTemplate => $exceptionType) {
             try {
                 $this->engine->render($invalidTemplate);
             } catch (\Exception $e) {
-                if ($e instanceof \RuntimeException) {
+                if ($e instanceof (
+                    'SigmaPHP\Template\Exceptions\\' . $exceptionType)
+                ) {
                     $exceptionsCount += 1;
                 }
             }
@@ -255,6 +254,30 @@ class EngineTest extends TestCase
     }
 
     /**
+     * Test custom directives.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testCustomDirectives()
+    {
+        $this->engine->registerCustomDirective('add', function (...$numbers) {
+            $sum = 0;
+
+            foreach ($numbers as $number) {
+                $sum += $number;
+            }
+
+            return $sum;
+        });
+
+        $this->assertTrue($this->checkOutput(
+            $this->renderTemplate('directives'),
+            $this->getTemplateResult('directives')
+        ));
+    }
+
+    /**
      * Test full processing for a template.
      *
      * @runInSeparateProcess
@@ -314,42 +337,5 @@ class EngineTest extends TestCase
             $this->renderTemplate('complex', $variables),
             $this->getTemplateResult('complex')
         ));
-    }
-
-    /**
-     * Test custom directives.
-     *
-     * @runInSeparateProcess
-     * @return void
-     */
-    public function testCustomDirectives()
-    {
-        $this->engine->registerCustomDirective('add', function (...$numbers) {
-            $sum = 0;
-
-            foreach ($numbers as $number) {
-                $sum += $number;
-            }
-
-            return $sum;
-        });
-
-        $this->assertTrue($this->checkOutput(
-            $this->renderTemplate('directives'),
-            $this->getTemplateResult('directives')
-        ));
-    }
-
-    /**
-     * Test engine through exception if the custom directive doesn't exists.
-     *
-     * @runInSeparateProcess
-     * @return void
-     */
-    public function TestEngineThroughExceptionIfCustomDirectiveDoesNotExists()
-    {
-        $this->expectException(RuntimeException::class);
-    
-        $this->engine->render('invalid.directives');
     }
 }

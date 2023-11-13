@@ -2,6 +2,8 @@
 
 namespace SigmaPHP\Template;
 
+use SigmaPHP\Template\Exceptions\InvalidExpressionException;
+use SigmaPHP\Template\Exceptions\UndefinedVariableException;
 use SigmaPHP\Template\Interfaces\ExpressionEvaluatorInterface;
 
 /**
@@ -45,7 +47,7 @@ class ExpressionEvaluator implements ExpressionEvaluatorInterface
 
         foreach (self::$blackList as $keyword) {
             if (strpos($expressionFiltered, $keyword) !== false) {
-                throw new \RuntimeException(
+                throw new InvalidExpressionException(
                     "Invalid expression : ({$expression})"
                 );
             }
@@ -60,7 +62,7 @@ class ExpressionEvaluator implements ExpressionEvaluatorInterface
 
         foreach ($matches[1] as $match) {
             if (!isset(${$match})) {
-                throw new \RuntimeException(
+                throw new UndefinedVariableException(
                     "Undefined variable : $$match"
                 );
             }
@@ -106,7 +108,7 @@ class ExpressionEvaluator implements ExpressionEvaluatorInterface
             
             foreach (self::$blackList as $keyword) {
                 if (strpos($expressionFiltered, $keyword) !== false) {
-                    throw new \RuntimeException(
+                    throw new InvalidExpressionException(
                         "Invalid expression : ({$expression})"
                     );
                 }
@@ -121,7 +123,7 @@ class ExpressionEvaluator implements ExpressionEvaluatorInterface
 
             foreach ($matches[1] as $match) {
                 if (!isset(${$match})) {
-                    throw new \RuntimeException(
+                    throw new UndefinedVariableException(
                         "Undefined variable : $$match"
                     );
                 }

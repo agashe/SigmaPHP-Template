@@ -2,6 +2,7 @@
 
 namespace SigmaPHP\Template\Parsers;
 
+use SigmaPHP\Template\Exceptions\TemplateParsingException;
 use SigmaPHP\Template\Interfaces\ParserInterface;
 
 /**
@@ -116,7 +117,7 @@ class BlocksParser implements ParserInterface
                                 $currentStartTags
                             )
                         ) {
-                            throw new \RuntimeException(
+                            throw new TemplateParsingException(
                                 "Missing 'end_block' tag for block '" . 
                                 end($currentStartTags) . "'"
                             );
@@ -145,12 +146,12 @@ class BlocksParser implements ParserInterface
             // if blocks open/close tags aren't matched , throw exception
             if (count($blocksStartTag) != count($blocksEndTag)) {
                 if (isset($blocksStartTag[0])) {
-                    throw new \RuntimeException(
+                    throw new TemplateParsingException(
                         "Missing 'end_block' tag for block " . 
                         $blocksStartTag[0]['name']
                     );
                 } else {
-                    throw new \RuntimeException(
+                    throw new TemplateParsingException(
                         "'end_block' used without block start " .
                         "in template [{$this->template}]"
                     );
@@ -234,7 +235,7 @@ class BlocksParser implements ParserInterface
                     if (
                         $matchEndTagWithBlockName[2] != end($currentStartTags)
                     ) {
-                        throw new \RuntimeException(
+                        throw new TemplateParsingException(
                             "Missing 'end_block' tag for block '" . 
                             end($currentStartTags) . "'"
                         );
@@ -257,12 +258,12 @@ class BlocksParser implements ParserInterface
         // if blocks open/close tags aren't matched , throw exception
         if (count($blocksStartTag) != count($blocksEndTag)) {
             if (isset($blocksStartTag[0])) {
-                throw new \RuntimeException(
+                throw new TemplateParsingException(
                     "Missing 'end_block' tag for block " . 
                     $blocksStartTag[0]['name']
                 );
             } else {
-                throw new \RuntimeException(
+                throw new TemplateParsingException(
                     "'end_block' used without block start " .
                     "in template [{$this->template}]"
                 );

@@ -2,6 +2,7 @@
 
 namespace SigmaPHP\Template\Parsers;
 
+use SigmaPHP\Template\Exceptions\TemplateParsingException;
 use SigmaPHP\Template\Interfaces\ParserInterface;
 use SigmaPHP\Template\ExpressionEvaluator;
 
@@ -104,7 +105,7 @@ class ConditionsParser implements ParserInterface
                     // check if no 'else' , or throw exception , since we can't 
                     // have 'else_if' after 'else' 
                     if (isset($elseTag[end($currentStartTags)])) {
-                        throw new \RuntimeException(
+                        throw new TemplateParsingException(
                             "'else_if' used after 'else' statement " .
                             "in template [{$this->template}]"
                         );
@@ -179,7 +180,7 @@ class ConditionsParser implements ParserInterface
                     if (!isset($ifStartTag[end($currentStartTags)]) &&
                         isset($elseIfTag[end($currentStartTags)])
                     ) {
-                        throw new \RuntimeException(
+                        throw new TemplateParsingException(
                             "'else_if' used without an if statement " .
                             "in template [{$this->template}]"
                         );
@@ -188,7 +189,7 @@ class ConditionsParser implements ParserInterface
                     if (!isset($ifStartTag[end($currentStartTags)]) &&
                         isset($elseTag[end($currentStartTags)])
                     ) {
-                        throw new \RuntimeException(
+                        throw new TemplateParsingException(
                             "'else' used without an if statement " .
                             "in template [{$this->template}]"
                         );
@@ -216,12 +217,12 @@ class ConditionsParser implements ParserInterface
         // if conditions open/close tags aren't matched , throw exception
         if (count($ifStartTag) != count($ifEndTag)) {
             if (isset($ifStartTag[0])) {
-                throw new \RuntimeException(
+                throw new TemplateParsingException(
                     "Missing 'end_if' tag for an if statement" .
                     "in template [{$this->template}]"
                 );
             } else {
-                throw new \RuntimeException(
+                throw new TemplateParsingException(
                     "'end_if' used without an if statement " .
                     "in template [{$this->template}]"
                 );
@@ -233,7 +234,7 @@ class ConditionsParser implements ParserInterface
             count($ifEndTag) == 0 &&
             count($elseIfTag) != 0
         ) {
-            throw new \RuntimeException(
+            throw new TemplateParsingException(
                 "'else_if' used without an if statement " .
                 "in template [{$this->template}]"
             );
@@ -243,7 +244,7 @@ class ConditionsParser implements ParserInterface
             count($ifEndTag) == 0 &&
             count($elseTag) != 0
         ) {
-            throw new \RuntimeException(
+            throw new TemplateParsingException(
                 "'else' used without an if statement " .
                 "in template [{$this->template}]"
             );
@@ -482,7 +483,7 @@ class ConditionsParser implements ParserInterface
                 // check if no 'else' , or throw exception , since we can't have
                 // else_if after 'else' 
                 if (isset($elseTag[end($currentStartTags)])) {
-                    throw new \RuntimeException(
+                    throw new TemplateParsingException(
                         "'else_if' used after 'else' statement " .
                         "in template [{$this->template}]"
                     );
@@ -556,7 +557,7 @@ class ConditionsParser implements ParserInterface
                 if (!isset($ifStartTag[end($currentStartTags)]) &&
                     isset($elseIfTag[end($currentStartTags)])
                 ) {
-                    throw new \RuntimeException(
+                    throw new TemplateParsingException(
                         "'else_if' used without an if statement " .
                         "in template [{$this->template}]"
                     );
@@ -565,7 +566,7 @@ class ConditionsParser implements ParserInterface
                 if (!isset($ifStartTag[end($currentStartTags)]) &&
                     isset($elseTag[end($currentStartTags)])
                 ) {
-                    throw new \RuntimeException(
+                    throw new TemplateParsingException(
                         "'else' used without an if statement " .
                         "in template [{$this->template}]"
                     );
@@ -588,12 +589,12 @@ class ConditionsParser implements ParserInterface
         // if conditions open/close tags aren't matched , throw exception
         if (count($ifStartTag) != count($ifEndTag)) {
             if (isset($ifStartTag[0])) {
-                throw new \RuntimeException(
+                throw new TemplateParsingException(
                     "Missing 'end_if' tag for an if statement" .
                     "in template [{$this->template}]"
                 );
             } else {
-                throw new \RuntimeException(
+                throw new TemplateParsingException(
                     "'end_if' used without an if statement " .
                     "in template [{$this->template}]"
                 );
@@ -605,7 +606,7 @@ class ConditionsParser implements ParserInterface
             count($ifEndTag) == 0 &&
             count($elseIfTag) != 0
         ) {
-            throw new \RuntimeException(
+            throw new TemplateParsingException(
                 "'else_if' used without an if statement " .
                 "in template [{$this->template}]"
             );
@@ -615,7 +616,7 @@ class ConditionsParser implements ParserInterface
             count($ifEndTag) == 0 &&
             count($elseTag) != 0
         ) {
-            throw new \RuntimeException(
+            throw new TemplateParsingException(
                 "'else' used without an if statement " .
                 "in template [{$this->template}]"
             );

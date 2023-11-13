@@ -2,6 +2,8 @@
 
 namespace SigmaPHP\Template\Parsers;
 
+use SigmaPHP\Template\Exceptions\InvalidExpressionException;
+use SigmaPHP\Template\Exceptions\TemplateParsingException;
 use SigmaPHP\Template\Interfaces\ParserInterface;
 use SigmaPHP\Template\ExpressionEvaluator;
 
@@ -401,7 +403,7 @@ class LoopsParser implements ParserInterface
                     if (!isset($loopStartTag[end($currentStartTags)]) &&
                         isset($breakLoopTag[end($currentStartTags)])
                     ) {
-                        throw new \RuntimeException(
+                        throw new TemplateParsingException(
                             "'break' statement was used outside loop " .
                             "in template [{$this->template}]"
                         );
@@ -410,7 +412,7 @@ class LoopsParser implements ParserInterface
                     if (!isset($loopStartTag[end($currentStartTags)]) &&
                         isset($continueLoopTag[end($currentStartTags)])
                     ) {
-                        throw new \RuntimeException(
+                        throw new TemplateParsingException(
                             "'continue' statement was used outside loop " .
                             "in template [{$this->template}]"
                         );
@@ -470,12 +472,12 @@ class LoopsParser implements ParserInterface
             // loops open/close tags aren't matched , throw exception
             if (count($loopStartTag) != count($loopEndTag)) {
                 if (isset($loopStartTag[0])) {
-                    throw new \RuntimeException(
+                    throw new TemplateParsingException(
                         "Missing 'end_for' tag for an loop " .
                         "in template [{$this->template}]"
                     );
                 } else {
-                    throw new \RuntimeException(
+                    throw new TemplateParsingException(
                         "'end_for' used without an loop " .
                         "in template [{$this->template}]"
                     );
@@ -487,7 +489,7 @@ class LoopsParser implements ParserInterface
                 count($loopEndTag) == 0 &&
                 count($breakLoopTag) != 0
             ) {
-                throw new \RuntimeException(
+                throw new TemplateParsingException(
                     "'break' statement was used outside loop " .
                     "in template [{$this->template}]"
                 );
@@ -497,7 +499,7 @@ class LoopsParser implements ParserInterface
                 count($loopEndTag) == 0 &&
                 count($continueLoopTag) != 0
             ) {
-                throw new \RuntimeException(
+                throw new TemplateParsingException(
                     "'continue' statement was used outside loop " .
                     "in template [{$this->template}]"
                 );
@@ -583,7 +585,7 @@ class LoopsParser implements ParserInterface
             }
             else {
                 // if the expression isn't iterable , throw exception
-                throw new \RuntimeException(
+                throw new InvalidExpressionException(
                     "Invalid loop expression : {$loop['start']['expression']} " 
                     . "in template [{$this->template}]"
                 );
@@ -816,7 +818,7 @@ class LoopsParser implements ParserInterface
 
             if (strpos($line, '{% end_for %}') !== false) {
                 if (!isset($loopStartTag[end($currentStartTags)])) {
-                    throw new \RuntimeException(
+                    throw new TemplateParsingException(
                         "'end_for' used without an loop " .
                         "in template [{$this->template}]"
                     );
@@ -852,7 +854,7 @@ class LoopsParser implements ParserInterface
                 if (!isset($loopStartTag[end($currentStartTags)]) &&
                     isset($breakLoopTag[end($currentStartTags)])
                 ) {
-                    throw new \RuntimeException(
+                    throw new TemplateParsingException(
                         "'break' statement was used outside loop " .
                         "in template [{$this->template}]"
                     );
@@ -861,7 +863,7 @@ class LoopsParser implements ParserInterface
                 if (!isset($loopStartTag[end($currentStartTags)]) &&
                     isset($continueLoopTag[end($currentStartTags)])
                 ) {
-                    throw new \RuntimeException(
+                    throw new TemplateParsingException(
                         "'continue' statement was used outside loop " .
                         "in template [{$this->template}]"
                     );
@@ -917,12 +919,12 @@ class LoopsParser implements ParserInterface
         // loops open/close tags aren't matched , throw exception
         if (count($loopStartTag) != count($loopEndTag)) {
             if (isset($loopStartTag[0])) {
-                throw new \RuntimeException(
+                throw new TemplateParsingException(
                     "Missing 'end_for' tag for an loop " .
                     "in template [{$this->template}]"
                 );
             } else {
-                throw new \RuntimeException(
+                throw new TemplateParsingException(
                     "'end_for' used without an loop " .
                     "in template [{$this->template}]"
                 );
@@ -934,7 +936,7 @@ class LoopsParser implements ParserInterface
             count($loopEndTag) == 0 &&
             count($breakLoopTag) != 0
         ) {
-            throw new \RuntimeException(
+            throw new TemplateParsingException(
                 "'break' statement was used outside loop " .
                 "in template [{$this->template}]"
             );
@@ -944,7 +946,7 @@ class LoopsParser implements ParserInterface
             count($loopEndTag) == 0 &&
             count($continueLoopTag) != 0
         ) {
-            throw new \RuntimeException(
+            throw new TemplateParsingException(
                 "'continue' statement was used outside loop " .
                 "in template [{$this->template}]"
             );
@@ -1001,7 +1003,7 @@ class LoopsParser implements ParserInterface
             }
             else {
                 // if the expression isn't iterable , throw exception
-                throw new \RuntimeException(
+                throw new InvalidExpressionException(
                     "Invalid loop expression : {$loop['start']['expression']} " 
                     . "in template [{$this->template}]"
                 );

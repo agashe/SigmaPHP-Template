@@ -2,6 +2,10 @@
 
 namespace SigmaPHP\Template;
 
+use SigmaPHP\Template\Exceptions\InvalidStatementException;
+use SigmaPHP\Template\Exceptions\TemplateNotFoundException;
+use SigmaPHP\Template\Exceptions\TemplateParsingException;
+use SigmaPHP\Template\Exceptions\UndefinedDirectiveException;
 use SigmaPHP\Template\Interfaces\EngineInterface;
 use SigmaPHP\Template\ExpressionEvaluator;
 use SigmaPHP\Template\Parsers\BlocksParser;
@@ -164,7 +168,7 @@ class Engine implements EngineInterface
             self::TEMPLATE_FILE_EXTENSION;
         
         if (!file_exists($templateFullPath)) {
-            throw new \RuntimeException(
+            throw new TemplateNotFoundException(
                 "The requested template [{$templateFileName}.template.html] " .
                 "doesn't exist"
             );
@@ -273,8 +277,8 @@ class Engine implements EngineInterface
                 $commandsCount = count($matches[0]);
 
                 $validCommands = [
-                    '~{% extend ([\"|\']+){1}([a-zA-Z0-9\.\/]+)(\1) %}~',
-                    '~{% include ([\"|\']+){1}([a-zA-Z0-9\.\/]+)(\1) %}~',
+                    '~{% extend ([\"|\']+){1}([a-zA-Z0-9\.\_\/]+)(\1) %}~',
+                    '~{% include ([\"|\']+){1}([a-zA-Z0-9\.\_\/]+)(\1) %}~',
                     '~{% show_block ([\"|\']+){1}([a-zA-Z0-9\.]+)(\1) %}~',
                     '~{% block ([\"|\']+){1}([a-zA-Z0-9\.]+)(\1) %}~', 
                     '~{% end_block %}~', 
@@ -313,7 +317,7 @@ class Engine implements EngineInterface
                 }
 
                 if ($commandsCount) {
-                    throw new \RuntimeException(
+                    throw new InvalidStatementException(
                         "Invalid statement : {$line} " .
                         "in template [{$this->template}]"
                     );
@@ -373,7 +377,7 @@ class Engine implements EngineInterface
         // in case the first line of the template was 'extend'
         // we need to handle it before any further processing 
         // on the template
-        if (preg_match('~{% extend ([\"|\']+){1}([a-zA-Z0-9\.\/]+)(\1) %}~',
+        if (preg_match('~{% extend ([\"|\']+){1}([a-zA-Z0-9\.\_\/]+)(\1) %}~',
             $this->content[0], $match)
         ) {
             // remove the 'extend' directive
@@ -432,7 +436,8 @@ class Engine implements EngineInterface
             }
             
             // handle extend template case
-            if (preg_match('~{% extend ([\"|\']+){1}([a-zA-Z0-9\.\/]+)(\1) %}~',
+            if (preg_match(
+                '~{% extend ([\"|\']+){1}([a-zA-Z0-9\.\_\/]+)(\1) %}~',
                 $line, $match))
             {
                 $updatedContent = array_merge(
@@ -444,7 +449,7 @@ class Engine implements EngineInterface
             }
 
             // handle include template case
-            if (preg_match('~{% include ([\"|\']+)([a-zA-Z0-9\.\/]+)(\1) %}~',
+            if (preg_match('~{% include ([\"|\']+)([a-zA-Z0-9\.\_\/]+)(\1) %}~',
                 $line, $match))
             {
                 $updatedContent = array_merge(
@@ -456,11 +461,11 @@ class Engine implements EngineInterface
             }
 
             // handle show block case
-            if (preg_match('~{% show_block ([\"|\']+)([a-zA-Z0-9\.]+)(\1) %}~',
+            if (preg_match('~{% show_block ([\"|\']+)([a-zA-Z0-9\.\_]+)(\1) %}~',
                 $line, $match))
             {
                 if (!isset($this->blocksParser->blocks[$match[2]])) {
-                    throw new \RuntimeException(
+                    throw new TemplateParsingException(
                         "Undefined block [{$match[2]}] " .
                         "in template [{$this->template}]"
                     );
@@ -510,7 +515,7 @@ class Engine implements EngineInterface
                 $line, $match)
             ) {
                 if (!isset($this->customDirectives[$match[1]])) {
-                    throw new \RuntimeException(
+                    throw new UndefinedDirectiveException(
                         "Undefined directive [{$match[1]}] " .
                         "in template [{$this->template}]"
                     );

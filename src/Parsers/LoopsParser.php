@@ -1144,7 +1144,7 @@ class LoopsParser implements ParserInterface
      * @param array $data
      * @return array
      */
-    public function parse($content, $data = [])
+    final public function parse($content, $data = [])
     {
         $this->content = $content;
         $this->data = $data;

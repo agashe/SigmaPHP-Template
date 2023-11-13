@@ -79,7 +79,7 @@ class ExpressionEvaluator implements ExpressionEvaluatorInterface
      * @param array $data
      * @return mixed
      */
-    public static function executeLine($line, $data = [])
+    final public static function executeLine($line, $data = [])
     {
         $lineExpressions = explode('{{', $line);
         unset($lineExpressions[0]);

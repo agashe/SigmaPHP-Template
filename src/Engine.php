@@ -83,7 +83,7 @@ class Engine implements EngineInterface
      * @param array $data 
      * @return void
      */
-    public function render($template, $data = [])
+    final public function render($template, $data = [])
     {
         // in case the developer used './' with the render method
         // we remove it since it points to the relative base path
@@ -132,7 +132,7 @@ class Engine implements EngineInterface
      * @param callable $callback
      * @return void
      */
-    public function registerCustomDirective($name, $callback)
+    final public function registerCustomDirective($name, $callback)
     {
         $this->customDirectives[$name] = $callback;
     }

@@ -1,0 +1,15 @@
+
+ 10 
+ integer 
+
+ test 
+ string 
+
+ 10.5 
+ double 
+
+ item #2 
+ array 
+
+ 1 
+ boolean 

@@ -13,7 +13,7 @@ interface EngineInterface
      * @param string $template 
      * @param array $data
      * @param bool $print
-     * @return array|void
+     * @return string|void
      */
     public function render($template, $data = [], $print = false);
 
@@ -25,4 +25,12 @@ interface EngineInterface
      * @return void
      */
     public function registerCustomDirective($name, $callback);
+
+    /**
+     * Set the time interval for caching.
+     * 
+     * @param int $interval
+     * @return void
+     */
+    public function setCacheTimeInterval($interval = 0);
 }

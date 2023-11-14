@@ -2,6 +2,7 @@
 
 use PHPUnit\Framework\TestCase;
 use SigmaPHP\Template\Engine;
+use SigmaPHP\Template\Exceptions\CacheDirectoryNotFoundException;
 
 /**
  * Template Engine Test
@@ -361,6 +362,58 @@ class EngineTest extends TestCase
         $this->assertTrue($this->checkOutput(
             $this->renderTemplate('basic', $variables, true),
             $this->getTemplateResult('basic')
+        ));
+    }
+    
+    /**
+     * Test engine will through exception if the cache path doesn't exist.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testEngineWillThroughExceptionIfTheCachePathDoesNotExist()
+    {
+        $this->expectException(CacheDirectoryNotFoundException::class);
+
+        $engine = new Engine(__DIR__ . '/templates', 'fake-cache-dir/');
+        $engine->render('variables');
+    }
+
+    /**
+     * Test save cache.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testSaveCache()
+    {
+        $engine = new Engine(
+            __DIR__ . '/templates',
+            __DIR__ . '/cache'
+        );
+        
+        $this->assertTrue($this->checkOutput(
+            explode("\n", $engine->render('variables')),
+            $this->getTemplateResult('variables')
+        ));
+    }
+   
+    /**
+     * Test load cache.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testLoadCache()
+    {
+        $engine = new Engine(
+            __DIR__ . '/templates',
+            __DIR__ . '/cache'
+        );
+        
+        $this->assertTrue($this->checkOutput(
+            explode("\n", $engine->render('variables')),
+            $this->getTemplateResult('variables')
         ));
     }
 }

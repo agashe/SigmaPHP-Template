@@ -114,14 +114,13 @@ class EngineTest extends TestCase
             'invalid.loops.open_tag' => 'TemplateParsingException',
             'invalid.loops.break_tag' => 'TemplateParsingException',
             'invalid.loops.continue_tag' => 'TemplateParsingException',
-            'invalid.loops.invalid_expression' => 'InvalidExpressionException',
+            'invalid.loops.expression' => 'InvalidExpressionException',
 
             'invalid.loops.inline.close_tag' => 'TemplateParsingException',
             'invalid.loops.inline.open_tag' => 'TemplateParsingException',
             'invalid.loops.inline.break_tag' => 'TemplateParsingException',
             'invalid.loops.inline.continue_tag' => 'TemplateParsingException',
-            'invalid.loops.inline.invalid_expression' =>
-                'InvalidExpressionException',
+            'invalid.loops.inline.expression' => 'InvalidExpressionException',
         ];
 
         foreach ($invalidTemplates as $invalidTemplate => $exceptionType) {

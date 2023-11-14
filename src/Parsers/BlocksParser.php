@@ -11,11 +11,6 @@ use SigmaPHP\Template\Interfaces\ParserInterface;
 class BlocksParser implements ParserInterface
 {
     /**
-     * @var string $template
-     */
-    private $template;
-
-    /**
      * @var array $content
      */
     private $content;
@@ -26,17 +21,22 @@ class BlocksParser implements ParserInterface
     private $data;
 
     /**
+     * @var string $template
+     */
+    public $template;
+    
+    /**
      * @var array $blocks
      */
     public $blocks;
 
     /**
      * Blocks Parser Constructor.
-     * 
-     * @param string $template
      */
-    public function __construct($template) {
-        $this->template = $template;
+    public function __construct() {
+        $this->content = [];
+        $this->data = [];
+        $this->blocks = [];
     }
 
     /**

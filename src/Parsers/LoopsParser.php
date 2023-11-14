@@ -13,11 +13,6 @@ use SigmaPHP\Template\ExpressionEvaluator;
 class LoopsParser implements ParserInterface
 {
     /**
-     * @var string $template
-     */
-    private $template;
-
-    /**
      * @var array $content
      */
     private $content;
@@ -26,6 +21,11 @@ class LoopsParser implements ParserInterface
      * @var array $data
      */
     private $data;
+
+    /**
+     * @var string $template
+     */
+    public $template;
 
     /**
      * @var array $loops
@@ -44,13 +44,14 @@ class LoopsParser implements ParserInterface
 
     /**
      * Loops Parser Constructor.
-     * 
-     * @param string $template
      */
-    public function __construct($template) {
-        $this->template = $template;
-        $this->conditionsParser = new ConditionsParser($this->template);
+    public function __construct() {
+        $this->content = [];
+        $this->data = [];
         $this->loops = [];
+        $this->inlineLoops = [];
+
+        $this->conditionsParser = new ConditionsParser();
     }
 
     /**
@@ -1150,6 +1151,7 @@ class LoopsParser implements ParserInterface
     {
         $this->content = $content;
         $this->data = $data;
+        $this->conditionsParser->template = $this->template;
 
         while (!$this->noMoreLoops()) {
             $this->handleNestedInlineLoops();

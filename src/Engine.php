@@ -77,6 +77,11 @@ class Engine implements EngineInterface
      */
     public function __construct($templatesPath = '') {
         $this->templatesPath = $templatesPath;
+
+        $this->blocksParser = new BlocksParser();
+        $this->conditionsParser = new ConditionsParser();
+        $this->loopsParser = new LoopsParser();
+
         $this->customDirectives = [];
     }
 
@@ -97,13 +102,16 @@ class Engine implements EngineInterface
         $this->content = $this->getTemplateContent($template);
         $this->data = $data;
 
-        $this->blocksParser = new BlocksParser($template);
-        $this->conditionsParser = new ConditionsParser($template);
-        $this->loopsParser = new LoopsParser($template);
+        // init parsers
+        $this->blocksParser->template = $template;
+        $this->conditionsParser->template = $template;
+        $this->loopsParser->template = $template;
 
         $this->blocksParser->blocks = [];
+        
         $this->conditionsParser->conditions = [];
         $this->conditionsParser->inlineConditions = [];
+        
         $this->loopsParser->loops = [];
         $this->loopsParser->inlineLoops = [];
 
@@ -121,8 +129,8 @@ class Engine implements EngineInterface
                 $this->currentTemplatePath);
         }
 
-        $this->template = $template . '.' .
-            self::TEMPLATE_FILE_EXTENSION;
+        // prefix template's name
+        $this->template = $template . '.' . self::TEMPLATE_FILE_EXTENSION;
 
         while ($this->processTemplate());
                         

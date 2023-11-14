@@ -12,11 +12,6 @@ use SigmaPHP\Template\ExpressionEvaluator;
 class ConditionsParser implements ParserInterface
 {
     /**
-     * @var string $template
-     */
-    private $template;
-
-    /**
      * @var array $content
      */
     private $content;
@@ -26,6 +21,11 @@ class ConditionsParser implements ParserInterface
      */
     private $data;
 
+    /**
+     * @var string $template
+     */
+    public $template;
+    
     /**
      * @var array $conditions
      */
@@ -38,11 +38,12 @@ class ConditionsParser implements ParserInterface
     
     /**
      * Conditions Parser Constructor.
-     * 
-     * @param string $template
      */
-    public function __construct($template) {
-        $this->template = $template;
+    public function __construct() {
+        $this->content = [];
+        $this->data = [];
+        $this->conditions = [];
+        $this->inlineConditions = [];
     }
 
     /**

@@ -42,15 +42,24 @@ class EngineTest extends TestCase
      *
      * @param string $template
      * @param array $variables
+     * @param bool $print
      * @return array
      */
-    private function renderTemplate($template, $variables = [])
+    private function renderTemplate($template, $variables = [], $print = false)
     {
-        ob_start();
-        
-        $this->engine->render($template, $variables);
-        
-        return explode("\n", ob_get_clean());
+        $result = '';
+
+        if ($print) {
+            ob_start();
+            
+            $this->engine->render($template, $variables, true);
+            
+            $result = ob_get_clean();
+        } else {
+            $result = $this->engine->render($template, $variables);
+        }
+
+        return explode("\n", $result);
     }
 
     /**
@@ -62,7 +71,6 @@ class EngineTest extends TestCase
      */
     private function checkOutput($actual, $expected)
     {
-        
         for ($i = 0;$i < count($actual);$i++) {
             if (!isset($expected[$i]) ||
                 trim($actual[$i]) != trim($expected[$i])
@@ -335,6 +343,24 @@ class EngineTest extends TestCase
         $this->assertTrue($this->checkOutput(
             $this->renderTemplate('complex', $variables),
             $this->getTemplateResult('complex')
+        ));
+    }
+
+    /**
+     * Test engine can prints the result.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testEngineCanPrintsTheResult()
+    {
+        $variables = [
+            'test1' => 'TEST #1'
+        ];
+
+        $this->assertTrue($this->checkOutput(
+            $this->renderTemplate('basic', $variables, true),
+            $this->getTemplateResult('basic')
         ));
     }
 }

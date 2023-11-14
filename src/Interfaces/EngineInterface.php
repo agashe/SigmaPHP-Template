@@ -11,10 +11,11 @@ interface EngineInterface
      * Render template.
      * 
      * @param string $template 
-     * @param array $data 
-     * @return void
+     * @param array $data
+     * @param bool $print
+     * @return array|void
      */
-    public function render($template, $data = []);
+    public function render($template, $data = [], $print = false);
 
     /**
      * Register custom directive.

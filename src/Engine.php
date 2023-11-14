@@ -89,10 +89,11 @@ class Engine implements EngineInterface
      * Render template.
      * 
      * @param string $template 
-     * @param array $data 
-     * @return void
+     * @param array $data
+     * @param bool $print
+     * @return array|void
      */
-    final public function render($template, $data = [])
+    final public function render($template, $data = [], $print = false)
     {
         // in case the developer used './' with the render method
         // we remove it since it points to the relative base path
@@ -133,8 +134,16 @@ class Engine implements EngineInterface
         $this->template = $template . '.' . self::TEMPLATE_FILE_EXTENSION;
 
         while ($this->processTemplate());
-                        
-        print implode("\n", $this->content);
+        
+        // print or return the processed template
+        $content = implode("\n", $this->content);
+
+        if ($print) {
+            print $content;
+            return;
+        }
+
+        return $content;
     }
 
     /**

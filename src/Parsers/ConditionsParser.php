@@ -40,6 +40,7 @@ class ConditionsParser implements ParserInterface
      * Conditions Parser Constructor.
      */
     public function __construct() {
+        $this->template = '';
         $this->content = [];
         $this->data = [];
         $this->conditions = [];
@@ -85,11 +86,7 @@ class ConditionsParser implements ParserInterface
             }, $inlineConditionBlock);
 
             foreach ($inlineConditionBlock as $i => $line) {
-                if (preg_match('~{% if \((.*?)\) %}~',
-                    $line, $matchStartTag))
-                {
-                    $counter += 1;
-
+                if (preg_match('~{% if \((.*?)\) %}~', $line, $matchStartTag)) {
                     $ifStartTag[$counter] = [
                         'tag' => $matchStartTag[0],
                         'expression' => $matchStartTag[1],
@@ -98,11 +95,13 @@ class ConditionsParser implements ParserInterface
                     ];
 
                     $currentStartTags[] = $counter;
+
+                    $counter += 1;
                 }
                 
                 if (preg_match('~{% else_if \((.*?)\) %}~',
-                    $line, $matchElseIfTag))
-                {
+                    $line, $matchElseIfTag)
+                ) {
                     // check if no 'else' , or throw exception , since we can't 
                     // have 'else_if' after 'else' 
                     if (isset($elseTag[end($currentStartTags)])) {
@@ -120,8 +119,7 @@ class ConditionsParser implements ParserInterface
                     ];
                 }
                 
-                if (preg_match('~{% else %}~', $line, $matchElseTag))
-                {
+                if (preg_match('~{% else %}~', $line, $matchElseTag)) {
                     $else = "{% else " . end($currentStartTags) . " %}";
                         
                     $inlineConditionBlock[$i] = str_replace(
@@ -367,7 +365,8 @@ class ConditionsParser implements ParserInterface
                             if (isset($conditionContent[1])) {
                                 $this->content[$condition['start']['line']] =
                                     preg_replace(
-                                        "~$ifStartBoundary\s*(.*?)\s*$ifEndBoundary~",
+                                        "~$ifStartBoundary\s*" .
+                                        "(.*?)\s*$ifEndBoundary~",
                                         $conditionContent[1],
                                         $this->content[
                                             $condition['start']['line']
@@ -376,7 +375,8 @@ class ConditionsParser implements ParserInterface
                             } else {
                                 $this->content[$condition['start']['line']] =
                                     preg_replace(
-                                        "~$ifStartBoundary\s*(.*?)\s*$ifEndBoundary~",
+                                        "~$ifStartBoundary\s*" .
+                                        "(.*?)\s*$ifEndBoundary~",
                                         '',
                                         $this->content[
                                             $condition['start']['line']
@@ -411,20 +411,21 @@ class ConditionsParser implements ParserInterface
                         if (isset($conditionContent[1])) {
                             $this->content[$condition['start']['line']] =
                                 preg_replace(
-                                    "~$ifStartBoundary\s*(.*?)\s*$ifEndBoundary~",
+                                    "~$ifStartBoundary\s*" .
+                                    "(.*?)\s*$ifEndBoundary~",
                                     $conditionContent[1],
                                     $this->content[$condition['start']['line']]
                                 );
                         } else {
                             $this->content[$condition['start']['line']] =
                                 preg_replace(
-                                    "~$ifStartBoundary\s*(.*?)\s*$ifEndBoundary~",
+                                    "~$ifStartBoundary\s*" .
+                                    "(.*?)\s*$ifEndBoundary~",
                                     '',
                                     $this->content[$condition['start']['line']]
                                 );
                         }
-                    }
-                    else {
+                    } else {
                         // if no 'else_if' or 'else' , delete the whole block
                         $this->content[$condition['start']['line']] =
                             preg_replace(
@@ -463,11 +464,7 @@ class ConditionsParser implements ParserInterface
                 continue;
             }
 
-            if (preg_match('~{% if \((.*?)\) %}~',
-                $line, $matchStartTag))
-            {
-                $counter += 1; // why increment before not after ??????
-
+            if (preg_match('~{% if \((.*?)\) %}~', $line, $matchStartTag)) {
                 $ifStartTag[$counter] = [
                     'tag' => $matchStartTag[0],
                     'expression' => $matchStartTag[1],
@@ -476,11 +473,13 @@ class ConditionsParser implements ParserInterface
                 ];
 
                 $currentStartTags[] = $counter;
+
+                $counter += 1;
             }
             
             if (preg_match('~{% else_if \((.*?)\) %}~',
-                $line, $matchElseIfTag))
-            {
+                $line, $matchElseIfTag)
+            ) {
                 // check if no 'else' , or throw exception , since we can't have
                 // else_if after 'else' 
                 if (isset($elseTag[end($currentStartTags)])) {
@@ -498,8 +497,7 @@ class ConditionsParser implements ParserInterface
                 ];
             }
             
-            if (preg_match('~{% else %}~', $line, $matchElseTag))
-            {
+            if (preg_match('~{% else %}~', $line, $matchElseTag)) {
                 $else = "{% else " . end($currentStartTags) . " %}";
                     
                 $this->content[$i] = str_replace(

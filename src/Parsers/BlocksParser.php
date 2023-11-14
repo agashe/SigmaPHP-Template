@@ -34,6 +34,7 @@ class BlocksParser implements ParserInterface
      * Blocks Parser Constructor.
      */
     public function __construct() {
+        $this->template = '';
         $this->content = [];
         $this->data = [];
         $this->blocks = [];

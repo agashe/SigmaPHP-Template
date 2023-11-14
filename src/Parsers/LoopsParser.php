@@ -46,6 +46,7 @@ class LoopsParser implements ParserInterface
      * Loops Parser Constructor.
      */
     public function __construct() {
+        $this->template = '';
         $this->content = [];
         $this->data = [];
         $this->loops = [];
@@ -242,6 +243,44 @@ class LoopsParser implements ParserInterface
         }
 
         return false;
+    }
+
+    /**
+     * Get loop iteration group.
+     * 
+     * @param string $expression
+     * @return array
+     */
+    private function getLoopIterationGroup($expression)
+    {
+        extract($this->data);
+
+        $group = [];
+
+        $expression = ExpressionEvaluator::execute(
+            $expression,
+            $this->data
+        );
+        
+        if (is_numeric($expression)) {
+            for ($j = 1;$j <= (int) $expression;$j++) {
+                $group[] = (int) $j;
+            }
+        }
+        else if (is_string($expression)) {
+            $group = str_split($expression);
+        }
+        else if (is_array($expression)) {
+            $group = $expression;
+        } else {
+            // if the expression isn't iterable , throw exception
+            throw new InvalidExpressionException(
+                "Invalid loop expression : {$expression} " 
+                . "in template [{$this->template}]"
+            );
+        }
+
+        return $group;
     }
 
     /**
@@ -565,32 +604,7 @@ class LoopsParser implements ParserInterface
             
             // prepare the expression , we convert the loop expression
             // to a group of items , so we can start looping
-            extract($this->data);
-
-            $group = [];
-            $expression = ExpressionEvaluator::execute(
-                $loop['start']['expression'],
-                $this->data
-            );
-            
-            if (is_numeric($expression)) {
-                for ($j = 1;$j <= (int) $expression;$j++) {
-                    $group[] = (int) $j;
-                }
-            }
-            else if (is_string($expression)) {
-                $group = str_split($expression);
-            }
-            else if (is_array($expression)) {
-                $group = $expression;
-            }
-            else {
-                // if the expression isn't iterable , throw exception
-                throw new InvalidExpressionException(
-                    "Invalid loop expression : {$loop['start']['expression']} " 
-                    . "in template [{$this->template}]"
-                );
-            }
+            $group = $this->getLoopIterationGroup($loop['start']['expression']);
             
             $loopBlock = '';
             $loopBlockContent = '';
@@ -983,32 +997,7 @@ class LoopsParser implements ParserInterface
 
             // prepare the expression , we convert the loop expression
             // to a group of items , so we can start looping
-            extract($this->data);
-
-            $group = [];
-            $expression = ExpressionEvaluator::execute(
-                $loop['start']['expression'],
-                $this->data
-            );
-            
-            if (is_numeric($expression)) {
-                for ($j = 1;$j <= (int) $expression;$j++) {
-                    $group[] = $j;
-                }
-            }
-            else if (is_string($expression)) {
-                $group = str_split($expression);
-            }
-            else if (is_array($expression)) {
-                $group = $expression;
-            }
-            else {
-                // if the expression isn't iterable , throw exception
-                throw new InvalidExpressionException(
-                    "Invalid loop expression : {$loop['start']['expression']} " 
-                    . "in template [{$this->template}]"
-                );
-            }
+            $group = $this->getLoopIterationGroup($loop['start']['expression']);
 
             $loopBlockContent = [];
             foreach ($group as $item) {
@@ -1151,6 +1140,7 @@ class LoopsParser implements ParserInterface
     {
         $this->content = $content;
         $this->data = $data;
+        
         $this->conditionsParser->template = $this->template;
 
         while (!$this->noMoreLoops()) {

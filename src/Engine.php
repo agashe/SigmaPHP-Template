@@ -556,7 +556,7 @@ class Engine implements EngineInterface
                 $recheck = true;
             }
         }
-                
+
         $this->content = $updatedContent;
 
         return $recheck;

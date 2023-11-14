@@ -100,37 +100,7 @@ class ExpressionEvaluator implements ExpressionEvaluatorInterface
             $expression = trim(str_replace(['{{', '}}'], '', 
                 $matchExpression[0]));
             
-            // check is the expression is safe.        
-            $expressionFiltered = preg_replace([
-                '~([\"|\'\`]+)(.*?)(\1)~',
-                '~\$([a-zA-Z0-9_]+)~'
-            ], '', $expression);
-            
-            foreach (self::$blackList as $keyword) {
-                if (strpos($expressionFiltered, $keyword) !== false) {
-                    throw new InvalidExpressionException(
-                        "Invalid expression : ({$expression})"
-                    );
-                }
-            }
-            
-            extract($data);
-
-            // check if all variables are defined , since eval() will only
-            // throw (Warning) if the variable is not defined !!
-            $matches = [];
-            preg_match_all('~\$([a-zA-Z0-9_]+)~', $expression, $matches);
-
-            foreach ($matches[1] as $match) {
-                if (!isset(${$match})) {
-                    throw new UndefinedVariableException(
-                        "Undefined variable : $$match"
-                    );
-                }
-            }
-
-            $result = '';
-            eval("\$result = $expression;");
+            $result = self::execute($expression, $data);
             
             $line = str_replace(
                 $matchExpression[0],

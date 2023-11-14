@@ -4,19 +4,19 @@
 {% end_block %}
 
 {-- #2 : nested blocks + end_block could have name  --}
-{% block 'bar' %}
+{% block '_bar_' %}
     bar
 
-    {% block 'test1' %}
+    {% block 'block-test1' %}
         test1
     {% end_block %}
-{% end_block 'bar' %}
+{% end_block '_bar_' %}
 
 {% show_block 'foo' %}
-{% show_block 'test1' %}
+{% show_block 'block-test1' %}
 
 {-- #3 : inline nested blocks  --}
 text before {% block 'one' %} block one {% block 'two' %} block two  {% end_block %} {% end_block %} between blocks {% show_block 'one' %} between blocks {% block 'three' %} block three {% block 'four' %} block four  {% end_block %} {% end_block %} text after
 
 {-- #4 : show blocks  --}
-{%          show_block                      'bar'                       %}
+{%          show_block                      '_bar_'                       %}

@@ -77,7 +77,8 @@ class BlocksParser implements ParserInterface
             }, $inlineBlock);
 
             foreach ($inlineBlock as $i => $line) {
-                if (preg_match('~{% block ([\"|\']+)([a-zA-Z0-9\.]+)(\1) %}~',
+                if (preg_match(
+                    '~{% block ([\"|\']+)([a-zA-Z0-9\.\-\_]+)(\1) %}~',
                     $line, $matchStartTag)
                 ) {
                     $blocksStartTag[] = [
@@ -109,7 +110,8 @@ class BlocksParser implements ParserInterface
                         );
                     }
                     else if (preg_match(
-                        '~{% end_block ([\"|\']+){1}([a-zA-Z0-9\.]+)(\1) %}~', 
+                        '~{% end_block ([\"|\']+){1}' .
+                        '([a-zA-Z0-9\.\-\_]+)(\1) %}~', 
                         $line, $matchEndTagWithBlockName)
                     ) {
                         if (
@@ -204,7 +206,8 @@ class BlocksParser implements ParserInterface
                 continue;
             }
 
-            if (preg_match('~{% block ([\"|\']+)([a-zA-Z0-9\.]+)(\1) %}~',
+            if (preg_match(
+                '~{% block ([\"|\']+)([a-zA-Z0-9\.\-\_]+)(\1) %}~',
                 $line, $matchStartTag))
             {
                 $blocksStartTag[] = [
@@ -229,7 +232,7 @@ class BlocksParser implements ParserInterface
                     );
                 }
                 else if (preg_match(
-                    '~{% end_block ([\"|\']+){1}([a-zA-Z0-9\.]+)(\1) %}~', 
+                    '~{% end_block ([\"|\']+){1}([a-zA-Z0-9\.\-\_]+)(\1) %}~', 
                     $line, $matchEndTagWithBlockName)
                 ) {
                     if (
@@ -285,7 +288,7 @@ class BlocksParser implements ParserInterface
 
         foreach ($this->content as $line) {
             if (preg_match(
-                '~{% block ([\"|\']+)([a-zA-Z0-9\.]+)(\1) %}~',
+                '~{% block ([\"|\']+)([a-zA-Z0-9\.\-\_]+)(\1) %}~',
                 $line, $match)
             ) {
                 $foundBlocks[] = $match[2];
@@ -295,7 +298,8 @@ class BlocksParser implements ParserInterface
         foreach ($foundBlocks as $block) {
             foreach ($lines as $i => $line) {
                 if (empty($currentBlock) && 
-                    preg_match('~{% block ([\"|\']+)([a-zA-Z0-9\.]+)(\1) %}~',
+                    preg_match(
+                        '~{% block ([\"|\']+)([a-zA-Z0-9\.\-\_]+)(\1) %}~',
                         $line, $match) && ($match[2] == $block)
                 ) {
                     $blocks[$match[2]] = [

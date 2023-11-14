@@ -277,12 +277,12 @@ class Engine implements EngineInterface
                 $commandsCount = count($matches[0]);
 
                 $validCommands = [
-                    '~{% extend ([\"|\']+){1}([a-zA-Z0-9\.\_\/]+)(\1) %}~',
-                    '~{% include ([\"|\']+){1}([a-zA-Z0-9\.\_\/]+)(\1) %}~',
-                    '~{% show_block ([\"|\']+){1}([a-zA-Z0-9\.]+)(\1) %}~',
-                    '~{% block ([\"|\']+){1}([a-zA-Z0-9\.]+)(\1) %}~', 
+                    '~{% extend ([\"|\']+){1}([a-zA-Z0-9\.\-\_\/]+)(\1) %}~',
+                    '~{% include ([\"|\']+){1}([a-zA-Z0-9\.\-\_\/]+)(\1) %}~',
+                    '~{% show_block ([\"|\']+){1}([a-zA-Z0-9\.\-\_]+)(\1) %}~',
+                    '~{% block ([\"|\']+){1}([a-zA-Z0-9\.\-\_]+)(\1) %}~', 
                     '~{% end_block %}~', 
-                    '~{% end_block ([\"|\']+){1}([a-zA-Z0-9\.]+)(\1) %}~', 
+                    '~{% end_block ([\"|\']+){1}([a-zA-Z0-9\.\-\_]+)(\1) %}~', 
                     '~{% define \$([a-zA-Z0-9_]+)\s*=\s*(.*) %}~',
                     '~{% if \((.*?)\) %}~',
                     '~{% else_if \((.*?)\) %}~',
@@ -377,7 +377,7 @@ class Engine implements EngineInterface
         // in case the first line of the template was 'extend'
         // we need to handle it before any further processing 
         // on the template
-        if (preg_match('~{% extend ([\"|\']+){1}([a-zA-Z0-9\.\_\/]+)(\1) %}~',
+        if (preg_match('~{% extend ([\"|\']+){1}([a-zA-Z0-9\.\-\_\/]+)(\1) %}~',
             $this->content[0], $match)
         ) {
             // remove the 'extend' directive
@@ -437,7 +437,7 @@ class Engine implements EngineInterface
             
             // handle extend template case
             if (preg_match(
-                '~{% extend ([\"|\']+){1}([a-zA-Z0-9\.\_\/]+)(\1) %}~',
+                '~{% extend ([\"|\']+){1}([a-zA-Z0-9\.\-\_\/]+)(\1) %}~',
                 $line, $match))
             {
                 $updatedContent = array_merge(
@@ -449,9 +449,10 @@ class Engine implements EngineInterface
             }
 
             // handle include template case
-            if (preg_match('~{% include ([\"|\']+)([a-zA-Z0-9\.\_\/]+)(\1) %}~',
-                $line, $match))
-            {
+            if (preg_match(
+                '~{% include ([\"|\']+)([a-zA-Z0-9\.\-\_\/]+)(\1) %}~',
+                $line, $match)
+            ) {
                 $updatedContent = array_merge(
                     $updatedContent,
                     $this->getTemplateContent($match[2])
@@ -461,9 +462,10 @@ class Engine implements EngineInterface
             }
 
             // handle show block case
-            if (preg_match('~{% show_block ([\"|\']+)([a-zA-Z0-9\.\_]+)(\1) %}~',
-                $line, $match))
-            {
+            if (preg_match(
+                '~{% show_block ([\"|\']+)([a-zA-Z0-9\.\-\_]+)(\1) %}~',
+                $line, $match)
+            ) {
                 if (!isset($this->blocksParser->blocks[$match[2]])) {
                     throw new TemplateParsingException(
                         "Undefined block [{$match[2]}] " .

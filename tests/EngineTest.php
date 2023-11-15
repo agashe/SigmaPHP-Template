@@ -2,7 +2,9 @@
 
 use PHPUnit\Framework\TestCase;
 use SigmaPHP\Template\Engine;
-use SigmaPHP\Template\Exceptions\CacheDirectoryNotFoundException;
+use SigmaPHP\Template\Exceptions\CacheProcessFailedException;
+use SigmaPHP\Template\Exceptions\InvalidCacheTimeIntervalException;
+use SigmaPHP\Template\Exceptions\InvalidCallbackException;
 
 /**
  * Template Engine Test
@@ -24,7 +26,7 @@ class EngineTest extends TestCase
         parent::setUp();
 
         // define new instance of the template engine
-        $this->engine = new Engine(__DIR__ . '/templates');
+        $this->engine = new Engine('/tests/templates');
     }
 
     /**
@@ -81,6 +83,22 @@ class EngineTest extends TestCase
         }
 
         return true;
+    }
+
+    /**
+     * Get value of private property.
+     *
+     * @param mixed $object
+     * @param string $property
+     * @return mixed
+     */
+    private function getPrivatePropertyValue($object, $property)
+    {
+        $objectReflection = new \ReflectionClass($object);
+        $propertyReflection = $objectReflection->getProperty($property);
+        $propertyReflection->setAccessible(true);
+        
+        return $propertyReflection->getValue($object);
     }
 
     /**
@@ -286,6 +304,20 @@ class EngineTest extends TestCase
     }
 
     /**
+     * Test engine will through exception if the custom directive callback is 
+     * invalid.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testEngineThroughExceptionIfDirectiveCallbackIsInvalid()
+    {
+        $this->expectException(InvalidCallbackException::class);
+
+        $this->engine->registerCustomDirective('invalid', '@!#$%');
+    }
+
+    /**
      * Test full processing for a template.
      *
      * @runInSeparateProcess
@@ -348,12 +380,12 @@ class EngineTest extends TestCase
     }
 
     /**
-     * Test engine can prints the result.
+     * Test engine can print the result.
      *
      * @runInSeparateProcess
      * @return void
      */
-    public function testEngineCanPrintsTheResult()
+    public function testEngineCanPrintTheResult()
     {
         $variables = [
             'test1' => 'TEST #1'
@@ -366,20 +398,6 @@ class EngineTest extends TestCase
     }
     
     /**
-     * Test engine will through exception if the cache path doesn't exist.
-     *
-     * @runInSeparateProcess
-     * @return void
-     */
-    public function testEngineWillThroughExceptionIfTheCachePathDoesNotExist()
-    {
-        $this->expectException(CacheDirectoryNotFoundException::class);
-
-        $engine = new Engine(__DIR__ . '/templates', 'fake-cache-dir/');
-        $engine->render('variables');
-    }
-
-    /**
      * Test save cache.
      *
      * @runInSeparateProcess
@@ -387,10 +405,7 @@ class EngineTest extends TestCase
      */
     public function testSaveCache()
     {
-        $engine = new Engine(
-            __DIR__ . '/templates',
-            __DIR__ . '/cache'
-        );
+        $engine = new Engine('/tests/templates', '/tests/cache');
         
         $this->assertTrue($this->checkOutput(
             explode("\n", $engine->render('variables')),
@@ -406,14 +421,87 @@ class EngineTest extends TestCase
      */
     public function testLoadCache()
     {
-        $engine = new Engine(
-            __DIR__ . '/templates',
-            __DIR__ . '/cache'
-        );
+        $engine = new Engine('/tests/templates', '/tests/cache');
         
         $this->assertTrue($this->checkOutput(
             explode("\n", $engine->render('variables')),
             $this->getTemplateResult('variables')
         ));
+    }
+    
+    /**
+     * Test cache interval setter.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testSetCacheInterval()
+    {
+        $this->engine->setCacheTimeInterval(100);
+
+        $this->assertEquals(
+            100,
+            $this->getPrivatePropertyValue(
+                $this->engine,
+                'cacheTimeInterval'
+            )
+        );
+    }
+
+    /**
+     * Test engine will through exception if the cache interval is invalid.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testEngineWillThroughExceptionIfTheCacheIntervalIsInvalid()
+    {
+        $this->expectException(InvalidCacheTimeIntervalException::class);
+
+        $this->engine->setCacheTimeInterval('abc');
+    }
+
+    /**
+     * Test engine will through exception if the cache file can't be saved.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testEngineWillThroughExceptionIfTheCacheFileCanNotBeSAved()
+    {
+        $this->expectException(CacheProcessFailedException::class);
+
+        $engine = new Engine('/tests/templates', '/tests/fake-cache-dir/');
+        $engine->render('variables');
+    }
+
+    /**
+     * Test engine will through exception if the cache file can't be loaded.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testEngineWillThroughExceptionIfTheCacheFileCanNotBeLoaded()
+    {
+        $engine = new Engine('/tests/templates', '/tests/cache');
+        $engine->render('variables');
+        
+        chmod(__DIR__ . '/cache', 0000);
+     
+        $exceptionWasThrown = false;
+
+        try {
+            $engine->render('variables');
+        }
+        catch (\Exception $e) {
+            if ($e instanceof CacheProcessFailedException) {
+                $exceptionWasThrown = true;
+            }
+        }
+        finally {
+            chmod(__DIR__ . '/cache', 0777);
+        }
+
+        $this->assertTrue($exceptionWasThrown);
     }
 }

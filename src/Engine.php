@@ -2,9 +2,10 @@
 
 namespace SigmaPHP\Template;
 
-use SigmaPHP\Template\Exceptions\CacheDirectoryNotFoundException;
+use SigmaPHP\Template\Exceptions\CacheProcessFailedException;
+use SigmaPHP\Template\Exceptions\InvalidCacheTimeIntervalException;
+use SigmaPHP\Template\Exceptions\InvalidCallbackException;
 use SigmaPHP\Template\Exceptions\InvalidStatementException;
-use SigmaPHP\Template\Exceptions\SaveCacheFailedException;
 use SigmaPHP\Template\Exceptions\TemplateNotFoundException;
 use SigmaPHP\Template\Exceptions\TemplateParsingException;
 use SigmaPHP\Template\Exceptions\UndefinedDirectiveException;
@@ -28,6 +29,12 @@ class Engine implements EngineInterface
      * Template cache's time interval in seconds 
      */
     const CACHE_TIME_INTERVAL = 300;
+
+
+    /**
+     * @var string $basePath
+     */
+    private $basePath;
 
     /**
      * @var string $templatesPath
@@ -93,8 +100,14 @@ class Engine implements EngineInterface
      * @param string $templatesPath
      */
     public function __construct($templatesPath = '', $cachePath = '') {
-        $this->templatesPath = $templatesPath;
-        $this->cachePath = $cachePath;
+        $this->basePath = dirname(
+            (new \ReflectionClass(
+                \Composer\Autoload\ClassLoader::class
+            ))->getFileName()
+        , 3);
+        
+        $this->templatesPath = trim($templatesPath, '/');
+        $this->cachePath = trim($cachePath, '/');
 
         $this->blocksParser = new BlocksParser();
         $this->conditionsParser = new ConditionsParser();
@@ -193,6 +206,12 @@ class Engine implements EngineInterface
      */
     final public function registerCustomDirective($name, $callback)
     {
+        if (!is_callable($callback)) {
+            throw new InvalidCallbackException(
+                "Invalid callback function for custom directive [{$name}]"
+            );
+        }
+
         $this->customDirectives[$name] = $callback;
     }
     
@@ -202,8 +221,15 @@ class Engine implements EngineInterface
      * @param int $interval
      * @return void
      */
-    final public function setCacheTimeInterval($interval = 0)
+    final public function setCacheTimeInterval($interval = 1)
     {
+        if (!is_int($interval) || ($interval < 1) ) {
+            throw new InvalidCacheTimeIntervalException(
+                "Invalid value for cache interval , only integers bigger " .
+                "than zero is allowed"
+            );
+        }
+
         $this->cacheTimeInterval = $interval;
     }
 
@@ -229,10 +255,11 @@ class Engine implements EngineInterface
         // replace the dots with slashes to get the correct path 
         $templateFileName = str_replace('.', '/', $templateFileName);
 
-        $templateFullPath = $this->templatesPath . '/' .
+        $templateFullPath = $this->basePath . '/' .
+            $this->templatesPath . '/' .
             $templateFileName . '.' .
             self::TEMPLATE_FILE_EXTENSION;
-        
+
         if (!file_exists($templateFullPath)) {
             throw new TemplateNotFoundException(
                 "The requested template [{$templateFileName}.template.html] " .
@@ -275,19 +302,14 @@ class Engine implements EngineInterface
      */
     private function saveCache($template, $content)
     {
-        if (!file_exists($this->cachePath)) {
-            throw new CacheDirectoryNotFoundException(
-                "The path for caching files [{$this->cachePath}] " .
-                "doesn't exist"
-            );
-        }
-
-        $cacheFilePath = $this->cachePath . '/' . md5($template) . '_' . time();
-
-        fopen($cacheFilePath, 'w');
-
-        if (!file_exists($cacheFilePath)) {
-            throw new SaveCacheFailedException(
+        try {
+            $cacheFilePath = $this->basePath . '/' .
+                $this->cachePath . '/' . 
+                md5($template) . '_' . time();
+            
+            fopen($cacheFilePath, 'w');
+        } catch (\Exception $e) {
+            throw new CacheProcessFailedException(
                 "Can't create cache file for template " .
                 "[{$template}.template.html] "
             );
@@ -304,14 +326,10 @@ class Engine implements EngineInterface
      */
     private function loadCache($template)
     {
-        if (!file_exists($this->cachePath)) {
-            throw new CacheDirectoryNotFoundException(
-                "The path for caching files [{$this->cachePath}] " .
-                "doesn't exist"
-            );
-        }
+        $cacheFilePath = $this->basePath . '/' .
+            $this->cachePath . '/' . 
+            md5($template) . '_*';
 
-        $cacheFilePath = $this->cachePath . '/' . md5($template) . '_*';
         $searchCacheFiles = glob($cacheFilePath);
         
         // return the cache version , only if the time is valid
@@ -325,9 +343,23 @@ class Engine implements EngineInterface
             if ((time() - ((int) $cacheCreationTime[1])) <= 
                 $this->cacheTimeInterval
             ) {
+                if (!is_file($searchCacheFiles[0])) {
+                    throw new CacheProcessFailedException(
+                        "Can't load cache file for template " .
+                        "[{$template}.template.html] "
+                    );
+                }
+
                 return file_get_contents($searchCacheFiles[0]);
             } else {
-                unlink($searchCacheFiles[0]);
+                try {
+                    unlink($searchCacheFiles[0]);
+                } catch (\Exception $e) {
+                    throw new CacheProcessFailedException(
+                        "Can't delete cache file for template " .
+                        "[{$template}.template.html] "
+                    );
+                }
             }
         }
 

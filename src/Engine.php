@@ -2,9 +2,8 @@
 
 namespace SigmaPHP\Template;
 
+use InvalidArgumentException;
 use SigmaPHP\Template\Exceptions\CacheProcessFailedException;
-use SigmaPHP\Template\Exceptions\InvalidCacheTimeIntervalException;
-use SigmaPHP\Template\Exceptions\InvalidCallbackException;
 use SigmaPHP\Template\Exceptions\InvalidStatementException;
 use SigmaPHP\Template\Exceptions\TemplateNotFoundException;
 use SigmaPHP\Template\Exceptions\TemplateParsingException;
@@ -207,7 +206,7 @@ class Engine implements EngineInterface
     final public function registerCustomDirective($name, $callback)
     {
         if (!is_callable($callback)) {
-            throw new InvalidCallbackException(
+            throw new InvalidArgumentException(
                 "Invalid callback function for custom directive [{$name}]"
             );
         }
@@ -224,7 +223,7 @@ class Engine implements EngineInterface
     final public function setCacheTimeInterval($interval = 1)
     {
         if (!is_int($interval) || ($interval < 1) ) {
-            throw new InvalidCacheTimeIntervalException(
+            throw new InvalidArgumentException(
                 "Invalid value for cache interval , only integers bigger " .
                 "than zero is allowed"
             );

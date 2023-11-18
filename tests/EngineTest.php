@@ -3,8 +3,6 @@
 use PHPUnit\Framework\TestCase;
 use SigmaPHP\Template\Engine;
 use SigmaPHP\Template\Exceptions\CacheProcessFailedException;
-use SigmaPHP\Template\Exceptions\InvalidCacheTimeIntervalException;
-use SigmaPHP\Template\Exceptions\InvalidCallbackException;
 
 /**
  * Template Engine Test
@@ -312,7 +310,7 @@ class EngineTest extends TestCase
      */
     public function testEngineThroughExceptionIfDirectiveCallbackIsInvalid()
     {
-        $this->expectException(InvalidCallbackException::class);
+        $this->expectException(InvalidArgumentException::class);
 
         $this->engine->registerCustomDirective('invalid', '@!#$%');
     }
@@ -456,7 +454,7 @@ class EngineTest extends TestCase
      */
     public function testEngineWillThroughExceptionIfTheCacheIntervalIsInvalid()
     {
-        $this->expectException(InvalidCacheTimeIntervalException::class);
+        $this->expectException(InvalidArgumentException::class);
 
         $this->engine->setCacheTimeInterval('abc');
     }

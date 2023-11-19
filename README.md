@@ -6,7 +6,7 @@ A powerful template engine for PHP. That you can use to build your web apps , wi
 
 * Print variables and evaluate expressions 
 * Extend and include templates , with support for **relative path**
-* Load templates from sub-folders using dot notation
+* Load templates from sub-directories using dot notation
 * All basic conditional statements *if*, *else if*, *else*
 * Support loops on all kinds of iterators (strings , numbers and arrays)
 * Support Blocks , to structure your templates 
@@ -40,7 +40,7 @@ $engine = new Engine('/templates');
 $output = $engine->render('index');
 ```
 
-The `Engine` constructor accepts 2 arguments , the first is the root path for the templates for example `views` or `templates` , or whatever name you prefer. In case no path was provided , the `Engine` , will consider the root path of your project as the templates folder.
+The `Engine` constructor accepts 2 arguments , the first is the root path for the templates for example `views` or `templates` , or whatever name you prefer. In case no path was provided , the `Engine` , will consider the root path of your project as the templates directory.
 
 ```
 $engine = new Engine('/path/to/my-html-views');
@@ -615,7 +615,31 @@ $engine->render('app', ['items' => $items], true);
 
 ### Caching
 
-Coming soon !
+Out of the box SigmaPHP-Template support template caching , by saving the template's result into a cache file. The `Engine` will always return the cached version , <ins>unless changes were made on the template or the data passed to it </ins>, in this case the `Engine` will re-compile the template and cache the new result.
+
+To enable the cache , all what you have to do , is to set the path for the cache directory in the `Engine` constructor :
+
+```
+<?php
+
+require 'vendor/autoload.php';
+
+use SigmaPHP\Template\Engine;
+
+$engine = new Engine('/templates', '/path/to/cache');
+
+// the Engine will look first for the cache version to return
+// if not found , the template will be compiled
+$output = $engine->render('index');
+```
+
+Enable caching is very useful especially for production environment , but while developing , the cache directory's size could get huge by time. So it's recommended to clean its content by deleting all files inside it.
+
+For machines running linux , you could simply run the following command :
+
+```
+rm /path/to/cache/*
+```
 
 ## Examples
 

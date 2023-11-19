@@ -25,12 +25,4 @@ interface EngineInterface
      * @return void
      */
     public function registerCustomDirective($name, $callback);
-
-    /**
-     * Set the time interval for caching.
-     * 
-     * @param int $interval
-     * @return void
-     */
-    public function setCacheTimeInterval($interval = 0);
 }

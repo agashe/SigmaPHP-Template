@@ -5,7 +5,7 @@ namespace SigmaPHP\Template\Exceptions;
 use RuntimeException;
 
 /**
- * Save Cache Failed Exception Exception
+ * Cache Process Failed Exception
  */
 class CacheProcessFailedException extends RuntimeException
 {}

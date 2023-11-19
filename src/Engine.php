@@ -25,12 +25,6 @@ class Engine implements EngineInterface
     const TEMPLATE_FILE_EXTENSION = 'template.html';
 
     /**
-     * Template cache's time interval in seconds 
-     */
-    const CACHE_TIME_INTERVAL = 300;
-
-
-    /**
      * @var string $basePath
      */
     private $basePath;
@@ -89,11 +83,6 @@ class Engine implements EngineInterface
     private $customDirectives;
 
     /**
-     * @var int $cacheTimeInterval
-     */
-    private $cacheTimeInterval;
-
-    /**
      * Template Engine Constructor.
      * 
      * @param string $templatesPath
@@ -113,7 +102,6 @@ class Engine implements EngineInterface
         $this->loopsParser = new LoopsParser();
 
         $this->customDirectives = [];
-        $this->cacheTimeInterval = self::CACHE_TIME_INTERVAL;
     }
 
     /**
@@ -131,9 +119,16 @@ class Engine implements EngineInterface
         // which in this case the path to templates  
         $template = str_replace('./', '', $template);
 
+        $this->content = $this->getTemplateContent($template);
+        $contentBeforeProcessing = $this->content;
+        $this->data = $data;
+
+        // prefix template's name
+        $this->template = $template . '.' . self::TEMPLATE_FILE_EXTENSION;
+
         // load cache if enabled
         if (!empty($this->cachePath)) {
-            $content = $this->loadCache($template);
+            $content = $this->loadCache($contentBeforeProcessing, $data);
 
             if ($content !== false) {
                 if ($print) {
@@ -144,9 +139,6 @@ class Engine implements EngineInterface
                 return $content;
             }
         }
-
-        $this->content = $this->getTemplateContent($template);
-        $this->data = $data;
 
         // init parsers
         $this->blocksParser->template = $template;
@@ -175,9 +167,6 @@ class Engine implements EngineInterface
                 $this->currentTemplatePath);
         }
 
-        // prefix template's name
-        $this->template = $template . '.' . self::TEMPLATE_FILE_EXTENSION;
-
         while ($this->processTemplate());
         
         // print or return the processed template
@@ -185,7 +174,7 @@ class Engine implements EngineInterface
 
         // save cache if enabled
         if (!empty($this->cachePath)) {
-            $this->saveCache($template, $content);
+            $this->saveCache($contentBeforeProcessing, $data, $content);
         }
 
         if ($print) {
@@ -212,24 +201,6 @@ class Engine implements EngineInterface
         }
 
         $this->customDirectives[$name] = $callback;
-    }
-    
-    /**
-     * Set the time interval for caching.
-     * 
-     * @param int $interval
-     * @return void
-     */
-    final public function setCacheTimeInterval($interval = 1)
-    {
-        if (!is_int($interval) || ($interval < 1) ) {
-            throw new InvalidArgumentException(
-                "Invalid value for cache interval , only integers bigger " .
-                "than zero is allowed"
-            );
-        }
-
-        $this->cacheTimeInterval = $interval;
     }
 
     /**
@@ -261,8 +232,9 @@ class Engine implements EngineInterface
 
         if (!file_exists($templateFullPath)) {
             throw new TemplateNotFoundException(
-                "The requested template [{$templateFileName}.template.html] " .
-                "doesn't exist"
+                "The requested template [{$templateFileName}] " .
+                self::TEMPLATE_FILE_EXTENSION .
+                " doesn't exist"
             );
         }
 
@@ -295,70 +267,50 @@ class Engine implements EngineInterface
     /**
      * Save processed content for template as cache file. 
      * 
-     * @param string $template
-     * @param string $content
+     * @param array $content
+     * @param array $data
+     * @param string $output
      * @return void
      */
-    private function saveCache($template, $content)
+    private function saveCache($content, $data, $output)
     {
         try {
             $cacheFilePath = $this->basePath . '/' .
                 $this->cachePath . '/' . 
-                md5($template) . '_' . time();
+                substr(md5(implode("\n", $content)), 0, 15) . '_' .
+                substr(md5(json_encode($data)), 0, 15);
             
             fopen($cacheFilePath, 'w');
+
+            file_put_contents($cacheFilePath, $output);
         } catch (\Exception $e) {
             throw new CacheProcessFailedException(
-                "Can't create cache file for template " .
-                "[{$template}.template.html] "
+                "Can't save cache file for template [{$this->template}]"
             );
         }
-
-        file_put_contents($cacheFilePath, $content);
     }
 
     /**
      * Load processed content for template from a cache file. 
      * 
-     * @param string $template
+     * @param array $content
+     * @param array $data
      * @return string|bool
      */
-    private function loadCache($template)
+    private function loadCache($content, $data)
     {
         $cacheFilePath = $this->basePath . '/' .
             $this->cachePath . '/' . 
-            md5($template) . '_*';
+            substr(md5(implode("\n", $content)), 0, 15) . '_' .
+            substr(md5(json_encode($data)), 0, 15);
 
-        $searchCacheFiles = glob($cacheFilePath);
-        
-        // return the cache version , only if the time is valid
-        // or delete old cache file
-        if (isset($searchCacheFiles[0]) && !empty($searchCacheFiles[0])) {        
-            $cacheCreationTime = explode(
-                md5($template) . '_',
-                $searchCacheFiles[0]
-            );
-            
-            if ((time() - ((int) $cacheCreationTime[1])) <= 
-                $this->cacheTimeInterval
-            ) {
-                if (!is_file($searchCacheFiles[0])) {
-                    throw new CacheProcessFailedException(
-                        "Can't load cache file for template " .
-                        "[{$template}.template.html] "
-                    );
-                }
-
-                return file_get_contents($searchCacheFiles[0]);
-            } else {
-                try {
-                    unlink($searchCacheFiles[0]);
-                } catch (\Exception $e) {
-                    throw new CacheProcessFailedException(
-                        "Can't delete cache file for template " .
-                        "[{$template}.template.html] "
-                    );
-                }
+        if (is_file($cacheFilePath)) {
+            try {
+                return file_get_contents($cacheFilePath);
+            } catch (\Exception $e) {
+                throw new CacheProcessFailedException(
+                    "Can't load cache file for template [{$this->template}]"
+                );
             }
         }
 

@@ -428,38 +428,6 @@ class EngineTest extends TestCase
     }
     
     /**
-     * Test cache interval setter.
-     *
-     * @runInSeparateProcess
-     * @return void
-     */
-    public function testSetCacheInterval()
-    {
-        $this->engine->setCacheTimeInterval(100);
-
-        $this->assertEquals(
-            100,
-            $this->getPrivatePropertyValue(
-                $this->engine,
-                'cacheTimeInterval'
-            )
-        );
-    }
-
-    /**
-     * Test engine will through exception if the cache interval is invalid.
-     *
-     * @runInSeparateProcess
-     * @return void
-     */
-    public function testEngineWillThroughExceptionIfTheCacheIntervalIsInvalid()
-    {
-        $this->expectException(InvalidArgumentException::class);
-
-        $this->engine->setCacheTimeInterval('abc');
-    }
-
-    /**
      * Test engine will through exception if the cache file can't be saved.
      *
      * @runInSeparateProcess

@@ -528,7 +528,7 @@ SigmaPHP-Template have loops directive `for .. in` , which has the ability to lo
 
 {% define $sum = 0 %}
 
-{% for $value in [1, 2, 3, 4, 5] %}
+{% for $i in [1, 2, 3, 4, 5] %}
     {{ $sum = $sum + $i }}
 {% end_for %}
 

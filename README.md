@@ -182,8 +182,114 @@ Comments could be on single line or multiple lines , and all the content wrapped
 --}
 ```
 
+
 ### Extend & Include Templates
+
+Usually when developing apps , we create base template which we extend in other templates. The `Engine` provides 2 directives to extend base templates and include sub templates.
+
+So assuming we have `base.template.html` :
+
+```
+<div class="main">
+    <p>Base Template</p>
+</div>
+```
+
+We could easily extend this template in `app.template.html` as following :
+
+```
+{% extend 'base' %}
+
+// the rest of app template content 
+```
+
+The `extend` directive accepts the base template name without the extension part (`template.html`).
+
+Next is the `include` directive , which allow us to re-use other templates in the current template , for example we could partial section on a page , or component like a button , alert .... etc
+
+```
+<form class="create-post-form">
+    <input type="text" name="title" />
+
+    {% include 'submit-button' %}
+</form>
+```
+In the example above `submit-button` is another template , which has the button markup :
+
+```
+<button class="btn btn-success fade is-submitting">Submit</button>
+```
+
+The final result will be :
+
+```
+<form class="create-post-form">
+    <input type="text" name="title" />
+
+    <button class="btn btn-success fade is-submitting">Submit</button>
+</form>
+```
+
+
+### Dot Notation Path
+
+To structure your templates in sub-directories , the `Engine` use the dot notation to access sub-directories , so assuming in the previous example , the `submit-button` was under `components` directory , we could easily access it :
+
+```
+<form class="create-post-form">
+    <input type="text" name="title" />
+
+    {% include 'components.submit-button' %}
+</form>
+```
+
+The same feature works with the `extend` directive :
+
+```
+{% extend 'admin.layouts.master' %}
+
+// the rest of the template
+```
+
+In both cases the `Engine` will search for these templates starting from the root directory of the templates (The one we set in the constructor) and load them :
+
+```
+components.submit-button --> templates/components/submit-button.template.html
+
+admin.layouts.master --> templates/admin/layouts/master.template.html
+```
+
+
 ### Relative Path 
+
+Sometimes we might ending up in situation where have 2 templates in the directory , and one of them extend/include the other , so we forced to write the full path , even they both in the same directory !!
+
+So let's take an example , assume we have 2 templates :
+
+```
+/very/long/path/to/admin/dashboard/default.template.html
+/very/long/path/to/admin/dashboard/_partial.template.html
+```
+To include `_partial` inside `default` , you have write :
+
+```
+... content of default.template.html
+
+{% include 'very.long.path.to.admin.dashboard._partial' %}
+
+```
+
+SigmaPHP-Template provides the relative-path operator `./` , in case you are extending or including templates that places in the same directory , we could add the `./` before the template's name , and the `Engine` will automatically look for the template in the same directory of the current template (under processing).
+
+So in the previous example , we could write :
+
+```
+... content of default.template.html
+
+{% include './_partial' %}
+
+```
+
 ### Blocks
 ### Defining Variables
 ### Conditions

@@ -274,14 +274,11 @@ class Engine implements EngineInterface
      */
     private function saveCache($content, $data, $output)
     {
-        try {
-            $cacheFilePath = $this->basePath . '/' .
-                $this->cachePath . '/' . 
-                substr(md5(implode("\n", $content)), 0, 15) . '_' .
-                substr(md5(json_encode($data)), 0, 15);
-            
-            fopen($cacheFilePath, 'w');
+        $cacheFilePath = $this->basePath . '/' . $this->cachePath . '/' . 
+            substr(md5(implode("\n", $content) . json_encode($data)), 0, 30);
 
+        try {
+            fopen($cacheFilePath, 'w');
             file_put_contents($cacheFilePath, $output);
         } catch (\Exception $e) {
             throw new CacheProcessFailedException(
@@ -299,10 +296,8 @@ class Engine implements EngineInterface
      */
     private function loadCache($content, $data)
     {
-        $cacheFilePath = $this->basePath . '/' .
-            $this->cachePath . '/' . 
-            substr(md5(implode("\n", $content)), 0, 15) . '_' .
-            substr(md5(json_encode($data)), 0, 15);
+        $cacheFilePath = $this->basePath . '/' . $this->cachePath . '/' . 
+            substr(md5(implode("\n", $content) . json_encode($data)), 0, 30);
 
         if (is_file($cacheFilePath)) {
             try {

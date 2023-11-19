@@ -102,7 +102,7 @@ The second argument is an array holding the variables that we gonna pass to the 
 Finally we have the third argument which is boolean value to either return the result as a string or just print the final result. In most cases we will need the string representation for return HTTP response or as mail body. So by default this argument is set to false , to print the result , set it true. 
 
 
-### Parenthesis
+### Parenthesis & Quotes
 SigmaPHP-Template uses 2 sets of parenthesis. Basic printing and expression evaluation both use double curly brackets :
 
 ```
@@ -119,6 +119,17 @@ Finally comments with curly brackets and pair of double dashes :
 
 ```
 {-- /* comments */ --}
+```
+
+For the quotes , both single `'` and double `"` could be used with directives that accept quoted parameters, so the following are both valid : 
+
+```
+{% block '...' %}
+
+// or
+
+{% block "..." %}
+
 ```
 
 
@@ -163,6 +174,7 @@ Just like normal printing , we could evaluate any expression and print the resul
 
 Normally all PHP built in functions will work except for unsafe methods , no one need `eval` or `exit` to run in his template !!
 
+!!! Other function like Carbon ????? !!!
 
 ### Comments
 
@@ -290,8 +302,165 @@ So in the previous example , we could write :
 
 ```
 
+
 ### Blocks
+
+When working with extend & include , we always need a way to structure the template in away that base template could be filled with a content from a the current template , for this purpose we have the `block` and `show_block` directives.
+
+The `block` directive define the block body , while the `show_block` directive call the block body and add it to the template. Let's take an example :
+
+Assuming we have `master.template.html` , which has the following content :
+
+```
+<html>
+    <head>
+        {% show_block 'title' %}
+    </head>
+
+    <body>
+        {% show_block 'content' %}
+    </body>
+</html>
+```
+
+Then let's create `app.template.html` , which will extend the `master` template. The `app` template MUST implement the blocks defined in the `master` , or an exception will be thrown :
+
+```
+{% extend 'master' %}
+
+{% block 'title' %}Home Page{% end_block %}
+
+{% block 'content' %}
+
+<article>Page Content</article>
+
+{% end_block %}
+```
+
+When running the example above the result is :
+
+```
+<html>
+    <head>
+        Home Page
+    </head>
+
+    <body>
+        <article>Page Content</article>
+    </body>
+</html>
+```
+
+The `block` and `show_block` directives could be used in the same file , like we want to control the visibility of a block using an if condition. And in some cases it's a mandatory to have block definition before the `show_block`. for example in `master` template we can add a block for the js files :
+
+```
+<html>
+    <head>
+        {% show_block 'title' %}
+    </head>
+
+    <body>
+        {% show_block 'content' %}
+
+        {-- JS Files --}
+        {% show_block 'js' %}
+    </body>
+</html>
+```
+
+Now we are forced to create the js block in all of our templates that extend `master` , instead we could define a default implementation for the js block :
+
+```
+<html>
+    <head>
+        {% show_block 'title' %}
+    </head>
+
+    <body>
+        {% show_block 'content' %}
+
+        {-- JS Files --}
+        {% block 'js' %}{-- Could be empty --}{% end_block %}
+        {% show_block 'js' %}
+    </body>
+</html>
+```
+
+Now no exceptions will be thrown , and the app will run. Also in the `app` template , we could easily call our js scripts , if needed :
+
+```
+{% extend 'master' %}
+
+{% block 'title' %}Home Page{% end_block %}
+
+{% block 'content' %}
+
+<article>Page Content</article>
+
+{% end_block %}
+
+{% block 'js' %}
+    <script src="main.js"></script>
+{% end_block %}
+```
+
+Please note that child's blocks content , will always override parent's block content !! So in the previous example assume js block had some content in the `master` , all will be overridden by the `app` js block's content.
+
+As for blocks naming , all litters capital/small , number and _ . - are allowed , so all the following names are valid :
+
+```
+{% block 'test1001' %}
+{% block 'small_article_container' %}
+{% block 'alert-message' %}
+```
+
+Extra point : if you prefer to add the block name to the `end_block` directive , The `Engine` will accept that behavior :
+
+```
+{% block 'my-block' %}
+    // ... my-block content
+{% end_block 'my-block' %}
+```
+
 ### Defining Variables
+
+Although it's not recommended to define your variables in the templates , but sometimes we are forced to do so , like to format date or subtract string from long text. Whatever the case , the `Engine` provides `define` directive , to define your variables using the following syntax :
+
+```
+{% define $x = 100 %}
+
+{-- Print $x --}
+{{ $x }}
+```
+The naming convention for the variables is same as the PHP veriable naming convention. And all defined variables MUST have default value , the default value could be scaler or expression result :
+
+```
+{% define $name = "John Doe" %}
+
+// or
+
+{% define $num = 1 + 2 + 3 %}
+```
+
+Variables also could be assigned to each other , or with variables defined with the template :
+
+```
+// index.php
+
+$engine->render('app', [
+    'user' => User::findById('123')
+]);
+
+
+
+// app.template.html
+
+{% define $userAge = $user->age %}
+
+{{ "User age : " . $userAge }}
+
+```
+
 ### Conditions
 ### Loops
 ### Custom Directives

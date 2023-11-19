@@ -37,7 +37,7 @@ use SigmaPHP\Template\Engine;
 
 $engine = new Engine('/templates');
 
-$engine->render('index');
+$output = $engine->render('index');
 ```
 
 The `Engine` constructor accepts 2 arguments , the first is the root path for the templates for example `views` or `templates` , or whatever name you prefer. In case no path was provided , the `Engine` , will consider the root path of your project as the templates folder.
@@ -141,7 +141,7 @@ The most basic functionality that any template engine can handle , is printing :
 $engine->render('message', [
     'name' => 'Ahmed',
     'age' => 15
-]);
+], true);
 ```
 in `message.template.html` :
 
@@ -447,7 +447,7 @@ Variables also could be assigned to each other , or with variables defined with 
 ```
 // index.php
 
-$engine->render('app', [
+$output = $engine->render('app', [
     'user' => User::findById('123')
 ]);
 
@@ -462,11 +462,300 @@ $engine->render('app', [
 ```
 
 ### Conditions
+
+In order to control your templates , conditions directives could be used to decide which part to show , hide or process. The condition is a regular PHP expression , that could be based on values from variables defined in the `render` method , defined in the template , or and other valid expression which could be evaluated to true/false.
+
+```
+{% if ($test1 == 'FOO') %} 
+    Test 1 equals : Foo
+{% else_if (1 + 1) %} 
+    Test 2
+{% else_if (false) %} 
+    Test 3
+{% else %} 
+    Do something ...
+{% end_if %}
+```
+
+`if` and `else_if` conditions should be warped by parenthesis `(...)`. And all of the conditions directives could be used all together or just a simple `if` / `end_if` pair. Also could be written inline.
+
+```
+{% define $show_block = true %}
+
+{% if ($show_block) %} 
+    {% show_block 'list-block' %}
+{% end_if %}
+
+<img src="{{ $imageSrc }}" class="{% if ($haveClass) %} mx-100 {% end_if %}" />
+
+{% if (($val > 0) && ($val < 100)) %} 
+    <p>Do something with {{$val}}</p>
+{% else %} 
+    Invalid value : {{$val}}
+{% end_if %}
+```
+
+And finally nested conditions are welcome as well :
+
+```
+{% if (($val > 0) && ($val < 100)) %} 
+    <p>Do something with {{$val}}</p>
+{% else %} 
+    {% if ($val > 100) %} 
+        <h1>The value is too large</h1>
+    {% else_if ($val < 0) %} 
+        <h1>The value is too small</h1>
+    {% else_if ($val == 0) %}
+        <h1>The value can't be zero</h1>
+    {% end_if %}
+{% end_if %}
+```
+
+
 ### Loops
+
+The looping directives , is the other type of the control statement , looping is a core feature in any template engine , so you could list stuff. 
+
+SigmaPHP-Template have loops directive `for .. in` , which has the ability to loop on numbers , strings and arrays.
+
+```
+{% for $litter in 'abcd' %} {{ $litter }} {% end_for %}
+
+{% for $num in 5 %}
+    {{ $num }}
+{% end_for %}
+
+
+{% define $sum = 0 %}
+
+{% for $value in [1, 2, 3, 4, 5] %}
+    {{ $sum = $sum + $i }}
+{% end_for %}
+
+{{ $sum }}
+
+
+// $items => [['id' => 1, .....], ['id' => 2, .....]]
+{% for $item in $items %}
+    {{ "{$item['id']} : {$item['name']}" }}
+{% end_for %}
+```
+
+In addition the `Engine` provides 2 directives for the loops `break` and `continue` , which can be used to control the loop. Both require a condition to evaluate. 
+
+```
+// break the loop
+{% for $item in $items %}
+    {% break ($item['id'] == 8) %}
+
+    {{ "{$item['id']} : {$item['name']}" }}
+{% end_for %}
+
+{-- Print Odd Numbers --}
+{% for $num in 10 %}
+    {% continue ($num % 2 == 0) %}
+
+    {{ $num }}
+{% end_for %}
+```
+
+And like conditions , nested loops is supported :
+
+```
+{% for $i in 2 %}
+    {% for $j in 3 %}
+        {% for $k in 4 %}
+            {{ $i * $j * $k }}
+        {% end_for %}
+    {% end_for %}
+{% end_for %}
+```
+
+
 ### Custom Directives
+
+Sometimes your application might require some kind of functionality in the templates to be implemented , like handle order's status , dealing with money and currency ... etc
+
+The `registerCustomDirective` method could be used to define your own directives. the define directives take the form `{% myDirective(.... parameters) %}`. The custom directive is function that might/might not accept some parameters and return a value that could be rendered by the `Engine` , let's have some examples :
+
+```
+// index.php
+
+$engine->registerCustomDirective('add', function (...$numbers) {
+    $sum = 0;
+
+    foreach ($numbers as $number) {
+        $sum += $number;
+    }
+
+    return $sum;
+});
+
+$engine->registerCustomDirective('formatAmount', function ($amount) {
+    return $amount . '$';
+});
+
+$engine->registerCustomDirective('year', function () {
+    return date('Y');
+});
+
+$engine->render('app', ['items' => $items], true);
+```
+
+```
+// app.template.html
+
+{% add(1, 2, 3) %} // will return 6
+
+{% formatAmount(75.25) %} // will return 75.25$
+
+{% year() %} // will return 20XX
+```
+
+
 ### Caching
 
+Coming soon !
+
 ## Examples
+
+In this section we can have a look for how we can we use the templates and the directives together to build our application.
+
+```
+
+// index.php , your controller or wherever place you render your templates
+
+<?php
+
+require 'vendor/autoload.php';
+
+use SigmaPHP\Template\Engine;
+
+$variables = [
+    'appName' => 'My Awesome App',
+    'message' => 'All done Successfully',
+    'navLinks' => [
+        ['name' => 'home', 'url' => '/path/to/home'],
+        ['name' => 'contact', 'url' => '/path/to/contact'],
+        ['name' => 'about', 'url' => '/path/to/about'],
+    ]
+];
+
+$engine = new Engine('/front/views', '/storage/cache');
+
+$output = $engine->render('homepage', $variables);
+
+// depending on your app return $output or send it in a http response , 
+// or whatever you like , for example : 
+return new HttpResponse($output);
+```
+
+```
+// base.template.html
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ $appName }} - {% show_block 'title' %}</title>
+</head>
+<body>
+    {% include 'full.header' %}
+    
+    {% show_block 'content' %}
+
+    {% include 'full.footer' %}
+
+    {-- JS SECTION --}
+    {% block 'js' %}
+        <script src="base.js"></script>
+    {% end_block %}
+    
+    {% show_block 'js' %}
+    {-- JS SECTION --}
+</body>
+</html>
+```
+
+```
+// header.template.html
+
+<header>
+    <a href="{{ $navLinks[0]['url'] }}" class="logo">{{ $appName }}</a>
+    <div class="navigation-links">
+        <ul class="list">
+            {% for $link in $navLinks %}
+                <li>
+                    <a {%if ($link['name'] == 'home')%}class="active"{%end_if%} href="{{ $link['url'] }}">{{ $link['name'] }}</a>
+                </li>
+            {% end_for %}
+        </ul>
+    </div>
+</header>
+```
+
+```
+// footer.template.html
+
+<footer>
+    <div class="footer-top">
+        {% include './button' %}
+    </div>
+    <div class="footer-content">
+        <ul class=”socials”>
+            {% for $platform in ['facebook', 'twitter', 'youtube'] %}
+                <li><a href="#"><i class="fa fa-{{$platform}}"></i></a></li>
+            {% end_for %}
+         </ul>
+    </div>
+    <div class="footer-bottom">
+        <b>{{ "{$appName} (C) All Rights Reserved " . date('Y') }}</b>
+    </div>
+</footer>
+```
+
+```
+// button.template.html
+
+<button class="btn">A Button</button>
+```
+
+```
+// button.template.html
+
+<div class="alert">
+    {{ $message }}
+</div>
+```
+
+```
+// homepage.template.html
+
+{% extend './base' %}
+
+{% block 'title' %} HomePage {% end_block %}
+
+{% block 'content' %}
+    <!-- Alert Message -->
+    {% if (!empty($message)) %}
+        {% include './alert' %}
+    {% end_if %}
+    <!-- Alert Message -->
+
+    <article>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
+        Sed vehicula porttitor velit sollicitudin porttitor. 
+        Phasellus sit amet euismod dolor.
+    </article>
+{% end_block 'content' %}
+
+{-- JS SECTION --}
+{% block 'js' %}
+    <script src="app.js"></script>
+{% end_block %}
+{-- JS SECTION --}
+```
 
 
 ## License

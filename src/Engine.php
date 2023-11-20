@@ -83,6 +83,11 @@ class Engine implements EngineInterface
     private $customDirectives;
 
     /**
+     * @var array $sharedVariables
+     */
+    private $sharedVariables;
+
+    /**
      * Template Engine Constructor.
      * 
      * @param string $templatesPath
@@ -102,6 +107,7 @@ class Engine implements EngineInterface
         $this->loopsParser = new LoopsParser();
 
         $this->customDirectives = [];
+        $this->sharedVariables = [];
     }
 
     /**
@@ -121,7 +127,9 @@ class Engine implements EngineInterface
 
         $this->content = $this->getTemplateContent($template);
         $contentBeforeProcessing = $this->content;
-        $this->data = $data;
+
+        // merge the shared variables 
+        $this->data = array_merge($this->sharedVariables, $data);
 
         // prefix template's name
         $this->template = $template . '.' . self::TEMPLATE_FILE_EXTENSION;
@@ -201,6 +209,25 @@ class Engine implements EngineInterface
         }
 
         $this->customDirectives[$name] = $callback;
+    }
+
+    /**
+     * Set shared variables.
+     * 
+     * @param array $variables
+     * @return void
+     */
+    final public function setSharedVariables($variables)
+    {
+        if (!is_array($variables)) {
+            throw new InvalidArgumentException(
+                "Shared variables MUST be an associative array !"
+            );
+        }
+
+        foreach ($variables as $name => $value) {
+            $this->sharedVariables[$name] = $value;
+        }
     }
 
     /**

@@ -490,4 +490,42 @@ class EngineTest extends TestCase
 
         $this->assertTrue($exceptionWasThrown);
     }
+
+    /**
+     * Test shared variables.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testSharedVariables()
+    {
+        $this->engine->setSharedVariables([
+            'home' => 'home',
+            'about' => 'about',
+            'contact' => 'contact',
+        ]);
+
+        $this->assertTrue($this->checkOutput(
+            $this->renderTemplate('shared.view1'),
+            $this->getTemplateResult('shared')
+        ));
+
+        $this->assertTrue($this->checkOutput(
+            $this->renderTemplate('shared.view2'),
+            $this->getTemplateResult('shared')
+        ));
+    }
+
+    /**
+     * Test engine will through exception if the shared variables is not array.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testEngineThroughExceptionIfTheSharedVariablesIsNotArray()
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        $this->engine->setSharedVariables('@!#$%');
+    }
 }

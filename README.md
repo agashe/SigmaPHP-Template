@@ -11,6 +11,7 @@ A powerful template engine for PHP. That you can use to build your web apps , wi
 * Support loops on all kinds of iterators (strings , numbers and arrays)
 * Support Blocks , to structure your templates 
 * Defining variables in the template 
+* Share variables between templates
 * Registering custom directives
 * Support for single/multiple lines comments
 * Caching
@@ -174,7 +175,19 @@ Just like normal printing , we could evaluate any expression and print the resul
 
 Normally all PHP built in functions will work except for unsafe methods , no one needs `eval` or `exit` to run in his template !!
 
-!!! Other function like Carbon ????? !!!
+Additional point is variable assigning , so in case you wanted to reassign a value for an variable in the template , we could simply write :
+
+```
+// assign new value for a variable
+// nothing will be shown on this line
+{{ $foo = 1 + 2 }}
+
+// we print the new value here !
+{{ $foo }}
+```
+Please note , that assigning values to variables won't render anything !
+
+
 
 ### Comments
 
@@ -461,6 +474,50 @@ $output = $engine->render('app', [
 
 {{ "User age : " . $age }}
 ```
+
+### Share Variables
+
+To share a variable(s) a cross multiple templates , the `Engine` provides the `setSharedVariables` , which accept an associative array containing the variables you would like to make accessible for all templates.
+
+For example , assume we have some values like your application's social media accounts URLs , which you want to show on every page. Normally you would do something like that :
+
+```
+// pass the variables to each template to the render method :(
+
+$facebook = 'https://.....';
+$linkedin = 'https://.....';
+$youtube = 'https://.....';
+
+$engine->render('home_page', [
+    'facebook' => $facebook,
+    'linkedin' => $linkedin,
+    'youtube' => $youtube,
+]);
+
+$engine->render('contact_us', [
+    'facebook' => $facebook,
+    'linkedin' => $linkedin,
+    'youtube' => $youtube,
+]);
+```
+
+Instead you could simply do the following :
+
+```
+
+$engine->setSharedVariables([
+    'facebook' => 'https://.....',
+    'linkedin' => 'https://.....',
+    'youtube' => 'https://.....'
+]);
+
+$engine->render('home_page');
+
+$engine->render('contact_us');
+
+// much cleaner :)
+```
+
 
 ### Conditions
 

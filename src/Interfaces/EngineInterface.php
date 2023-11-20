@@ -25,4 +25,12 @@ interface EngineInterface
      * @return void
      */
     public function registerCustomDirective($name, $callback);
+
+    /**
+     * Set shared variable.
+     * 
+     * @param array $variables
+     * @return void
+     */
+    public function setSharedVariables($variables);
 }

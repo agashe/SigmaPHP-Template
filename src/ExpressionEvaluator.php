@@ -34,10 +34,10 @@ class ExpressionEvaluator implements ExpressionEvaluatorInterface
      * Execute an expression and return the result.
      * 
      * @param string $expression
-     * @param array $data
+     * @param array &$data
      * @return mixed
      */
-    public static function execute($expression, $data = [])
+    public static function execute($expression, &$data)
     {
         // check is the expression is safe.        
         $expressionFiltered = preg_replace([
@@ -68,6 +68,18 @@ class ExpressionEvaluator implements ExpressionEvaluatorInterface
             }
         }
 
+        // if the expression is just assigning value to variable
+        // don't return anything , just assign the value , also
+        // we check that the expression won't consider something
+        // like $x == $y an assign :)
+        if (preg_match(
+            '~^\s*\$([a-zA-Z0-9_]+)\s*=\s*(.*)\s*$~', $expression, $match) &&
+            $match[2][0] != '='
+        ) {
+            eval("\$data['{$match[1]}'] = {$match[2]};");
+            return '';
+        }
+
         $result = '';
         eval("\$result = $expression;");
         
@@ -78,10 +90,10 @@ class ExpressionEvaluator implements ExpressionEvaluatorInterface
      * Execute all expressions in a line and return the result.
      * 
      * @param string $line
-     * @param array $data
+     * @param array &$data
      * @return mixed
      */
-    final public static function executeLine($line, $data = [])
+    final public static function executeLine($line, &$data)
     {
         $lineExpressions = explode('{{', $line);
         unset($lineExpressions[0]);

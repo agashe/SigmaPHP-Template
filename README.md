@@ -172,7 +172,7 @@ Just like normal printing , we could evaluate any expression and print the resul
 {{ date('Y-m-d') }}
 ```
 
-Normally all PHP built in functions will work except for unsafe methods , no one need `eval` or `exit` to run in his template !!
+Normally all PHP built in functions will work except for unsafe methods , no one needs `eval` or `exit` to run in his template !!
 
 !!! Other function like Carbon ????? !!!
 

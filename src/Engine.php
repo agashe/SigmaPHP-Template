@@ -640,7 +640,10 @@ class Engine implements EngineInterface
                     $arguments = explode(',', $match[2]);
 
                     $arguments = array_map(function ($argument) {
-                        return ExpressionEvaluator::execute($argument);
+                        return ExpressionEvaluator::execute(
+                            $argument,
+                            $this->data
+                        );
                     }, $arguments);
                 }
 

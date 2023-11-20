@@ -384,10 +384,10 @@ class BlocksParser implements ParserInterface
      * Parse blocks in a template.
      * 
      * @param array $content
-     * @param array $data
+     * @param array &$data
      * @return array
      */
-    final public function parse($content, $data = [])
+    final public function parse($content, &$data)
     {
         $this->content = $content;
         $this->data = $data;
@@ -395,6 +395,8 @@ class BlocksParser implements ParserInterface
         $this->handleNestedInlineBlocks();
         $this->handleNestedBlocks();
         $this->extractBlocks();
+
+        $data = $this->data;
 
         return $this->content;
     }

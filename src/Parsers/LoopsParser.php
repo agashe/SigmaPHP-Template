@@ -76,7 +76,8 @@ class LoopsParser implements ParserInterface
                 $this->content[$i], $match)
             ) {
                 $this->data[$match[1]] = ExpressionEvaluator::execute(
-                    $match[2]
+                    $match[2],
+                    $this->data
                 );
             }
         }
@@ -1133,10 +1134,10 @@ class LoopsParser implements ParserInterface
      * Parse loops in a template.
      * 
      * @param array $content
-     * @param array $data
+     * @param array &$data
      * @return array
      */
-    final public function parse($content, $data = [])
+    final public function parse($content, &$data)
     {
         $this->content = $content;
         $this->data = $data;
@@ -1154,6 +1155,8 @@ class LoopsParser implements ParserInterface
         }
 
         $this->removeLoopValueTags();
+
+        $data = $this->data;
 
         return $this->content;
     }

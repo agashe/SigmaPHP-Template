@@ -1,8 +1,8 @@
 {% for $i in 5 %} 
-    {% block 'test2' %} {% define $j = 10 %} {% define $k = 10 %} test {{ $j * $k }} {% end_block %}
-    lol
-    {% show_block 'test2' %} blablabla
-    lolololo
+    {% block 'test2' %} {% define $a = 10 %} {% define $b = 10 %} test {{ $a * $b }} {% end_block %}
+    $TEST
+    {% show_block 'test2' %} Some Text
+    TEST$
 {% end_for %}
 
 {% block 'test' %}
@@ -95,3 +95,16 @@
         {% end_if %}
     {% end_if %}
 {% end_if %}
+
+{{ $foo = 'a1' }}
+{{ $foo }}
+{{ $foo = $studentGrades[1] }}
+{{ $foo }}
+{{ $foo = false }}
+{{ (int) $foo }}
+{{ $foo = 1000 }}
+{{ $foo }}
+{{ $foo = 5 + 6 + 8 }}
+{{ $foo }}
+{{ $foo = 'a' . 'b' . 'c' }}
+{{ $foo }}

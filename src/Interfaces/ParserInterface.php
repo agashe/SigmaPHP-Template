@@ -12,8 +12,8 @@ interface ParserInterface
      * of blocks including : conditional, loops and content
      * 
      * @param array $content
-     * @param array $data
+     * @param array &$data
      * @return array
      */
-    public function parse($content, $data = []);
+    public function parse($content, &$data);
 }

@@ -458,7 +458,8 @@ class Engine implements EngineInterface
                     '{%' . $part, $match)
                 ) {
                     $this->data[$match[1]] = ExpressionEvaluator::execute(
-                        $match[2]
+                        $match[2],
+                        $this->data
                     );
 
                     $this->content[$i] = str_replace(

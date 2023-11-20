@@ -457,8 +457,9 @@ $output = $engine->render('app', [
 
 {% define $userAge = $user->age %}
 
-{{ "User age : " . $userAge }}
+{% define $age = $userAge %}
 
+{{ "User age : " . $age }}
 ```
 
 ### Conditions

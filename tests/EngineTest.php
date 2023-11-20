@@ -203,8 +203,12 @@ class EngineTest extends TestCase
      */
     public function testDefiningVariables()
     {
+        $variables = [
+            'test1' => 'TEST #1'
+        ];
+
         $this->assertTrue($this->checkOutput(
-            $this->renderTemplate('variables'),
+            $this->renderTemplate('variables', $variables),
             $this->getTemplateResult('variables')
         ));
     }
@@ -405,8 +409,12 @@ class EngineTest extends TestCase
     {
         $engine = new Engine('/tests/templates', '/tests/cache');
         
+        $variables = [
+            'test1' => 'TEST #1'
+        ];
+
         $this->assertTrue($this->checkOutput(
-            explode("\n", $engine->render('variables')),
+            explode("\n", $engine->render('variables', $variables)),
             $this->getTemplateResult('variables')
         ));
     }
@@ -420,9 +428,13 @@ class EngineTest extends TestCase
     public function testLoadCache()
     {
         $engine = new Engine('/tests/templates', '/tests/cache');
+
+        $variables = [
+            'test1' => 'TEST #1'
+        ];
         
         $this->assertTrue($this->checkOutput(
-            explode("\n", $engine->render('variables')),
+            explode("\n", $engine->render('variables', $variables)),
             $this->getTemplateResult('variables')
         ));
     }
@@ -438,7 +450,12 @@ class EngineTest extends TestCase
         $this->expectException(CacheProcessFailedException::class);
 
         $engine = new Engine('/tests/templates', '/tests/fake-cache-dir/');
-        $engine->render('variables');
+        
+        $variables = [
+            'test1' => 'TEST #1'
+        ];
+        
+        $engine->render('variables', $variables);
     }
 
     /**
@@ -450,14 +467,17 @@ class EngineTest extends TestCase
     public function testEngineWillThroughExceptionIfTheCacheFileCanNotBeLoaded()
     {
         $engine = new Engine('/tests/templates', '/tests/cache');
-        $engine->render('variables');
         
         chmod(__DIR__ . '/cache', 0000);
      
         $exceptionWasThrown = false;
 
         try {
-            $engine->render('variables');
+            $variables = [
+                'test1' => 'TEST #1'
+            ];
+    
+            $engine->render('variables', $variables);
         }
         catch (\Exception $e) {
             if ($e instanceof CacheProcessFailedException) {

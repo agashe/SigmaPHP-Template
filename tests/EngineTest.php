@@ -113,6 +113,7 @@ class EngineTest extends TestCase
             'invalid.not_found' => 'TemplateNotFoundException',
             'invalid.statement' => 'InvalidStatementException',
             'invalid.expression' => 'InvalidExpressionException',
+            'invalid.empty_expression' => 'InvalidExpressionException',
             'invalid.extend' => 'TemplateNotFoundException',
             'invalid.directives' => 'UndefinedDirectiveException',
             

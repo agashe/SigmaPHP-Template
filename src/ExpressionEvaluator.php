@@ -103,10 +103,16 @@ class ExpressionEvaluator implements ExpressionEvaluatorInterface
         }, $lineExpressions);
         
         foreach ($lineExpressions as $lineExpression) {
-            preg_match('~{{[^{}]+}}~', $lineExpression, $matchExpression);
-            
+            preg_match('~{{(.*?)}}~', $lineExpression, $matchExpression);
+
             if (empty($matchExpression[0])) {
                 continue;
+            }
+
+            if (empty($matchExpression[1])) {
+                throw new InvalidExpressionException(
+                    "Can't process empty expression on line : [{$line}]"
+                );
             }
 
             $expression = trim(str_replace(['{{', '}}'], '', 

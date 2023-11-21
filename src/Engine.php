@@ -641,7 +641,7 @@ class Engine implements EngineInterface
             }
             
             // process variables and expressions
-            if (preg_match('~{{[^{}]+}}~', $line, $match)) {
+            if (preg_match('~{{(.*?)}}~', $line, $match)) {
                 $line = ExpressionEvaluator::executeLine(
                     $line, 
                     $this->data

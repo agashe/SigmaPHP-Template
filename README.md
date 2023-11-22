@@ -475,6 +475,34 @@ $output = $engine->render('app', [
 {{ "User age : " . $age }}
 ```
 
+**2 Important Notes About Variables**
+
+1- Variables could be redefined and in this case it will be consider as re-assigning , so in the example below the final value for `$x` is 10: 
+
+```
+{% define $x = 5 %}
+{% define $x = 10 %}
+```
+
+2- Since variables are globally defined , you can not define a variable inside a local scope like : if conditions , loops and blocks !!
+
+```
+// All the following will throw exception upon execution :
+
+{% if (....) %}
+    {% define $x = 5 %}
+{% end_if %}
+
+{% for ... in .... %}
+    {% define $x = 5 %}
+{% end_for %}
+
+{% block '..... %}
+    {% define $x = 5 %}
+{% end_block %}
+```
+
+
 ### Share Variables
 
 To share a variable(s) a cross multiple templates , the `Engine` provides the `setSharedVariables` , which accept an associative array containing the variables you would like to make accessible for all templates.

@@ -1,0 +1,9 @@
+{% define $x = 1 %}
+
+{% if (false) %}
+    {% define $x = 5 %}
+{% else_if (false) %}
+    {% define $x = 8 %}
+{% end_if %}
+
+{{$x}}

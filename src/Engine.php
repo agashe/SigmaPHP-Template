@@ -13,6 +13,7 @@ use SigmaPHP\Template\ExpressionEvaluator;
 use SigmaPHP\Template\Parsers\BlocksParser;
 use SigmaPHP\Template\Parsers\ConditionsParser;
 use SigmaPHP\Template\Parsers\LoopsParser;
+use SigmaPHP\Template\Parsers\VariablesParser;
 
 /**
  * Template Engine Class 
@@ -78,6 +79,11 @@ class Engine implements EngineInterface
     private $loopsParser;
 
     /**
+     * @var \VariablesParser $variablesParser
+     */
+    private $variablesParser;
+
+    /**
      * @var array $customDirectives
      */
     private $customDirectives;
@@ -105,6 +111,7 @@ class Engine implements EngineInterface
         $this->blocksParser = new BlocksParser();
         $this->conditionsParser = new ConditionsParser();
         $this->loopsParser = new LoopsParser();
+        $this->variablesParser = new VariablesParser();
 
         $this->customDirectives = [];
         $this->sharedVariables = [];
@@ -152,6 +159,7 @@ class Engine implements EngineInterface
         $this->blocksParser->template = $template;
         $this->conditionsParser->template = $template;
         $this->loopsParser->template = $template;
+        $this->variablesParser->template = $template;
 
         $this->blocksParser->blocks = [];
         
@@ -468,38 +476,6 @@ class Engine implements EngineInterface
     }
     
     /**
-     * Handle defined variables in the template. 
-     * 
-     * @return bool
-     */
-    private function defineVariables()
-    {
-        foreach ($this->content as $i => $line) {
-            // for multiple variables on the same line , we break the line
-            // and do our process , then remove the definition tags
-            // finally we glue everything back together
-            $lineParts = explode('{%', $line);
-            foreach ($lineParts as $part) {
-                if (preg_match(
-                    '~{% define \$([a-zA-Z0-9_]+)\s*=\s*(.*) %}~',
-                    '{%' . $part, $match)
-                ) {
-                    $this->data[$match[1]] = ExpressionEvaluator::execute(
-                        $match[2],
-                        $this->data
-                    );
-
-                    $this->content[$i] = str_replace(
-                        $match[0],
-                        '',
-                        $this->content[$i]
-                    );
-                }
-            }
-        }
-    }
-    
-    /**
      * Traverse through template lines and handle different cases. 
      * 
      * @return bool
@@ -512,7 +488,6 @@ class Engine implements EngineInterface
 
         $this->removeComments();
         $this->cleanTemplate();
-        $this->defineVariables();
         
         // in case the first line of the template was 'extend'
         // we need to handle it before any further processing 
@@ -529,6 +504,11 @@ class Engine implements EngineInterface
                 $this->content
             );            
         }
+
+        $this->content = $this->variablesParser->parse(
+            $this->content,
+            $this->data
+        );
 
         $this->content = $this->blocksParser->parse(
             $this->content,

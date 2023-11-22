@@ -1,0 +1,14 @@
+{% define $x = 5 %}
+
+{% block 'label22' %}
+    {% define $x = 8 %}
+    {{ $x }}
+
+    {% block 'label' %}
+        {% define $x = 8787 %}
+    {% end_block %}
+{% end_block %}
+
+{% show_block 'label22' %}
+
+{{ $x }}

@@ -117,6 +117,15 @@ class EngineTest extends TestCase
             'invalid.extend' => 'TemplateNotFoundException',
             'invalid.directives' => 'UndefinedDirectiveException',
             
+            'invalid.variables.define' => 'InvalidStatementException',
+            'invalid.variables.line' => 'TemplateParsingException',
+            'invalid.variables.condition' => 'TemplateParsingException',
+            'invalid.variables.block' => 'TemplateParsingException',
+            'invalid.variables.loop' => 'TemplateParsingException',
+            'invalid.variables.inline.condition' => 'TemplateParsingException',
+            'invalid.variables.inline.block' => 'TemplateParsingException',
+            'invalid.variables.inline.loop' => 'TemplateParsingException',
+
             'invalid.blocks.close_tag' => 'TemplateParsingException',
             'invalid.blocks.open_tag' => 'TemplateParsingException',
             'invalid.blocks.tag_labels' => 'TemplateParsingException',

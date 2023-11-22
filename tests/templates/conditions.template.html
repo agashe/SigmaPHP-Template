@@ -60,8 +60,8 @@
 
 {% show_block 'foo' %}
 
+{% define $x =          1000 %}
 {% if (1) %} 
-    {% define $x =          1000 %}
     {{$x}}
 {% end_if %}
 
@@ -72,6 +72,6 @@
 
 <div class="alert {% if ($test1 == 'TEST #1') %}         alert-success    {% else %} alert-basic      {% end_if %}">This is some content</div>
 
-{% if (1) %} {% define $x =          1000 %}{{$x}}{% end_if %}
+{% define $x =          1000 %} {% if (1) %}{{$x}}{% end_if %}
 
 {% define $foo = true %}

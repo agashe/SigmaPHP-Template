@@ -25,3 +25,9 @@
 
 {%define $u = $test1 %}
 {{ $u }}
+
+{{ $t }}
+{%define $t = 5 %}
+{%define $t = 7 %}
+
+{% define $x = 10 %} {% if (false) %} {{ $x * $y }} {% end_if %} {% define $y = 11 %}

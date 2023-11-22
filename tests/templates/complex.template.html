@@ -1,5 +1,5 @@
 {% for $i in 5 %} 
-    {% block 'test2' %} {% define $a = 10 %} {% define $b = 10 %} test {{ $a * $b }} {% end_block %}
+    {% define $a = 10 %} {% block 'test2' %} test {{ $a * $b }} {% end_block %} {% define $b = 10 %}
     $TEST
     {% show_block 'test2' %} Some Text
     TEST$

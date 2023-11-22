@@ -1,0 +1,7 @@
+{% define $x = 5 %}
+
+{% for $i in 3 %}
+    {% define $x = $i %}
+{% end_for %}
+
+{{$x}}

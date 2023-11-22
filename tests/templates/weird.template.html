@@ -91,7 +91,7 @@ Let's also check for loop block {% for $i in 3 %} after
 TEST
 before {% end_for%} , does it respect the line ?
 
-Let's also check for loop block {% for $i in 3 %} {%define $PI=3.14%}
+{%define $PI=3.14%} Let's also check for loop block {% for $i in 3 %}
 TEST {{ $i * $PI}}
 {% end_for%} , does it respect the line ?
 

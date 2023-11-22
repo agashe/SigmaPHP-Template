@@ -93,7 +93,7 @@ before {% end_for%} , does it respect the line ?
 
 {%define $PI=3.14%} Let's also check for loop block {% for $i in 3 %}
 TEST {{ $i * $PI}}
-{% end_for%} , does it respect the line ?
+{% end_for%} , does it respect the line ? {%define $g = 9.8%}
 
 Let's also check for loop block {% for $i in 3 %} {% block 'test' %} BLOCK
 {% end_block %} TEST {% if ($i == 2)%}{% show_block 'test' %}

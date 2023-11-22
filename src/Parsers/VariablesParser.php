@@ -69,41 +69,9 @@ class VariablesParser implements ParserInterface
     }
     
     /**
-     * Check if line is valid , and has no variables inside directives.
-     * 
-     * @param string $line
-     * @return void
-     */
-    private function checkLine($line)
-    {   
-        // we break each line into 2 part , then we check if after the start tag
-        // a variable definition or before the end tag , only in that case we
-        // throw exception , otherwise we continue execution
-        $isInvalid = false;
-
-        $directives = [
-            'if' , 'for', 'block',
-            'end_if' , 'end_for', 'end_block'
-        ];
-
-        foreach ($directives as $i => $directive) {
-            $lineParts = explode('{% ' . $directive, $line);
-                
-            if (isset($lineParts[1]) && 
-                (strpos($lineParts[(($i < 3))], '{% define') !== false)
-            ) {
-                throw new TemplateParsingException(
-                    "Variable defined inside local scope : [{$line}]" .
-                    " , in template [{$this->template}]"
-                );
-            }
-        }
-    }
-
-    /**
      * Handle variables inside nested inline conditions , blocks and loops.
      * 
-     * @return array
+     * @return void
      */
     private function handleVariablesInsideNestedInlineDirectives()
     {
@@ -179,9 +147,55 @@ class VariablesParser implements ParserInterface
     }
 
     /**
+     * Handle variables mixed with directives.
+     * 
+     * @return void
+     */
+    private function handleVariablesMixedWithDirectives()
+    {   
+        // we break each line into 2 part , then we check if after the start tag
+        // a variable definition or before the end tag , only in that case we
+        // throw exception , otherwise we continue execution
+        $directives = [
+            'if' , 'for', 'block',
+            'end_if' , 'end_for', 'end_block'
+        ];
+
+        foreach ($this->content as $i => $line) {
+            // skip lines that doesn't have start tag with define
+            if ((strpos($line, '{% define') !== false) &&
+                (
+                    (strpos($line, '{% if') !== false) ||
+                    (strpos($line, '{% block') !== false) ||
+                    (strpos($line, '{% for') !== false) ||
+                    (strpos($line, '{% end_if') !== false) ||
+                    (strpos($line, '{% end_block') !== false) ||
+                    (strpos($line, '{% end_for') !== false)
+                )    
+            ) {
+                foreach ($directives as $n => $directive) {
+                    $lineParts = explode('{% ' . $directive, $line);
+                        
+                    if (isset($lineParts[1]) && 
+                        (strpos($lineParts[((int)($n <= 2))], 
+                            '{% define') !== false)
+                    ) {
+                        throw new TemplateParsingException(
+                            "Variable defined inside local scope : [{$line}]" .
+                            " , in template [{$this->template}]"
+                        );
+                    }
+                }
+
+                $this->defineVariables($line, $i);
+            }
+        }
+    }
+
+    /**
      * Handle variables inside nested conditions , blocks and loops.
      * 
-     * @return array
+     * @return void
      */
     private function handleVariablesInsideNestedDirectives()
     {
@@ -192,7 +206,18 @@ class VariablesParser implements ParserInterface
         $isLoop = 0;
 
         foreach ($this->content as $i => $line) {
-            $this->checkLine($line);
+            if ((strpos($line, '{% define') !== false) &&
+                (
+                    (strpos($line, '{% if') !== false) ||
+                    (strpos($line, '{% block') !== false) ||
+                    (strpos($line, '{% for') !== false) ||
+                    (strpos($line, '{% end_if') !== false) ||
+                    (strpos($line, '{% end_block') !== false) ||
+                    (strpos($line, '{% end_for') !== false)
+                )    
+            ) {
+                continue;
+            }
 
             if (!$isCondition && !$isBlock && !$isLoop) {
                 $this->defineVariables($line, $i);
@@ -227,15 +252,17 @@ class VariablesParser implements ParserInterface
             }
 
             if (strpos($line, '{% define') === false) {
-                if (strpos($line, '{% end_if') !== false) {
+                if (($isCondition > 0) && 
+                    strpos($line, '{% end_if') !== false
+                ) {
                     $isCondition -= 1;
                 }
 
-                if (strpos($line, '{% end_block') !== false) {
+                if (($isBlock > 0) && strpos($line, '{% end_block') !== false) {
                     $isBlock -= 1;
                 }
 
-                if (strpos($line, '{% end_for') !== false) {
+                if (($isLoop > 0) && strpos($line, '{% end_for') !== false) {
                     $isLoop -= 1;
                 }
             }
@@ -255,6 +282,7 @@ class VariablesParser implements ParserInterface
         $this->data = $data;
 
         $this->handleVariablesInsideNestedInlineDirectives();
+        $this->handleVariablesMixedWithDirectives();
         $this->handleVariablesInsideNestedDirectives();
 
         $data = $this->data;

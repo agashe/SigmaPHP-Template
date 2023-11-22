@@ -122,6 +122,7 @@ class EngineTest extends TestCase
             'invalid.variables.condition' => 'TemplateParsingException',
             'invalid.variables.block' => 'TemplateParsingException',
             'invalid.variables.loop' => 'TemplateParsingException',
+            
             'invalid.variables.inline.condition' => 'TemplateParsingException',
             'invalid.variables.inline.block' => 'TemplateParsingException',
             'invalid.variables.inline.loop' => 'TemplateParsingException',

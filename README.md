@@ -63,7 +63,7 @@ SigmaPHP-Template uses template files with extension `.template.html` , it is ju
 
 <h1>Header Tag</h1>
 <ul>
-    {% for 1 in 5 %}
+    {% for $i in 5 %}
         <li>{{ $i }}</li>
     {% end_for %}
 </ul>

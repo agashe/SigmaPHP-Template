@@ -32,16 +32,8 @@ class Engine implements EngineInterface
 
     /**
      * @var string $templatesPath
-     * The root path for all template files.
      */
     private $templatesPath;
-    
-    /**
-     * @var string $currentTemplatePath
-     * Current template under processing , useful for
-     * include and extend by relative path.
-     */
-    private $currentTemplatePath;
 
     /**
      * @var string $cachePath
@@ -133,6 +125,7 @@ class Engine implements EngineInterface
         $template = str_replace('./', '', $template);
 
         $this->content = $this->getTemplateContent($template);
+
         $contentBeforeProcessing = $this->content;
 
         // merge the shared variables 
@@ -168,20 +161,6 @@ class Engine implements EngineInterface
         
         $this->loopsParser->loops = [];
         $this->loopsParser->inlineLoops = [];
-
-        // get the current template path
-        $this->currentTemplatePath = $this->templatesPath;
-
-        if (strpos($template, '.') !== false) {
-            $this->currentTemplatePath = explode('.', $template);
-            
-            unset($this->currentTemplatePath[
-                count($this->currentTemplatePath) - 1
-            ]);
-
-            $this->currentTemplatePath = implode('.', 
-                $this->currentTemplatePath);
-        }
 
         while ($this->processTemplate());
         
@@ -246,39 +225,41 @@ class Engine implements EngineInterface
      */
     private function getTemplateContent($templateFileName)
     {
-        // set the current path
-        if (strpos($templateFileName, './') !== false) {
-            $templateFileName = str_replace(
-                './', 
-                $this->currentTemplatePath . '.',
-                $templateFileName
-            );
-        }
-
         // in case the template is in a sub-directory
         // we use dot-notation , but it's just the matter of
         // replace the dots with slashes to get the correct path 
-        $templateFileName = str_replace('.', '/', $templateFileName);
+        $templateFileNameFormatted = str_replace('.', '/', $templateFileName);
 
         $templateFullPath = $this->basePath . '/' .
             $this->templatesPath . '/' .
-            $templateFileName . '.' .
+            $templateFileNameFormatted. '.' .
             self::TEMPLATE_FILE_EXTENSION;
-
+        
         if (!file_exists($templateFullPath)) {
             throw new TemplateNotFoundException(
-                "The requested template [{$templateFileName}] " .
-                self::TEMPLATE_FILE_EXTENSION .
-                " doesn't exist"
+                "The requested template [{$templateFullPath}] doesn't exist"
             );
         }
 
         // clean lines break and return the content as array 
-        return explode("\n", str_replace(
+        $content = explode("\n", str_replace(
             ["\n\r", "\r"],
             "\n",
             file_get_contents($templateFullPath)  
         ));
+
+        // handle relative path in the new content
+        // assume we have 'admin.views.dashboard'
+        // we extract only the 'admin.views' part
+        // then join it to the extend/include
+        // in the extended/included template
+        $path = explode('.', $templateFileName);
+        unset($path[count($path) - 1]);
+        $path = implode('.', $path);
+
+        $content = $this->handleRelativePAth($content, $path);
+
+        return $content;
     }
 
     /**
@@ -345,6 +326,52 @@ class Engine implements EngineInterface
         }
 
         return false;
+    }
+
+    /**
+     * Handle relative path in extend and include. 
+     * 
+     * @param array $content
+     * @param string $path
+     * @return array
+     */
+    private function handleRelativePAth($content, $path = '')
+    {
+        foreach ($content as $i => $line) {
+            // handle extend template case
+            if (preg_match(
+                '~{% extend ([\"|\']+){1}([a-zA-Z0-9\.\-\_\/]+)(\1) %}~',
+                $line, $match))
+            {
+                if ($this->phraseExists(['./'], $match[2])) {
+                    $match[2] = str_replace('./', '', $match[2]);
+                    
+                    $content[$i] = str_replace(
+                        './'.$match[2],
+                        $path . '.' . $match[2],
+                        $content[$i]
+                    );
+                }
+            }
+
+            // handle include template case
+            if (preg_match(
+                '~{% include ([\"|\']+)([a-zA-Z0-9\.\-\_\/]+)(\1) %}~',
+                $line, $match)
+            ) {
+                if ($this->phraseExists(['./'], $match[2])) {
+                    $match[2] = str_replace('./', '', $match[2]);
+                    
+                    $content[$i] = str_replace(
+                        './'.$match[2],
+                        $path . '.' . $match[2],
+                        $content[$i]
+                    );
+                }
+            }
+        }
+
+        return $content;
     }
 
     /**

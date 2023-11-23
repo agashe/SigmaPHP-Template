@@ -84,7 +84,7 @@ class BlocksParser implements ParserInterface
                 ) {
                     $blocksStartTag[] = [
                         'tag' => $matchStartTag[0],
-                        'name' => $matchStartTag[2],
+                        'name' => $matchStartTag[2]
                     ];
     
                     $blocks[$matchStartTag[2]] = [
@@ -160,28 +160,6 @@ class BlocksParser implements ParserInterface
                     );
                 }
             }
-
-            // extract blocks body and remove them from the content
-            foreach ($blocks as $blockStartTag => $block) {
-                $blockStartBoundary = preg_quote($block['start_tag']);
-                $blockEndBoundary = preg_quote($block['end_tag']);
-                
-                // extract body
-                if (preg_match(
-                    "~$blockStartBoundary\s*(.*?)\s*$blockEndBoundary~",
-                    $this->content[$lineNumber],
-                    $match
-                )) {
-                    $blocks[$blockStartTag]['body'] = [$match[1]];
-                }
-
-                $this->content[$lineNumber] =
-                    preg_replace(
-                        "~$blockStartBoundary\s*(.*?)\s*$blockEndBoundary~",
-                        '',
-                        $this->content[$lineNumber]
-                    );
-            }
         }
 
         $this->blocks = array_merge($this->blocks, $blocks);
@@ -213,7 +191,7 @@ class BlocksParser implements ParserInterface
             {
                 $blocksStartTag[] = [
                     'tag' => $matchStartTag[0],
-                    'name' => $matchStartTag[2],
+                    'name' => $matchStartTag[2]
                 ];
 
                 $currentStartTags[] = $matchStartTag[2];
@@ -288,16 +266,60 @@ class BlocksParser implements ParserInterface
         $lines = $this->content;
 
         foreach ($this->content as $line) {
-            if (preg_match(
+            if (preg_match_all(
                 '~{% block ([\"|\']+)([a-zA-Z0-9\.\-\_]+)(\1) %}~',
-                $line, $match)
+                $line, $matches)
             ) {
-                $foundBlocks[] = $match[2];
+                $foundBlocks = array_merge($foundBlocks, $matches[2]);
             } 
         }
 
-        foreach ($foundBlocks as $block) {
+        foreach (array_unique($foundBlocks) as $block) {
             foreach ($lines as $i => $line) {
+                // handle inline 
+                if ((strpos($line, '{% block') !== false) && 
+                    (strpos($line, '{% end_block') !== false) &&
+                    preg_match(
+                        '~{% block ([\"|\']+)([a-zA-Z0-9\.\-\_]+)(\1) %}~',
+                        $line, $match) && ($match[2] == $block)
+                ) {
+
+                    // delete old implementation inline or not
+                    if (isset($this->blocks[$block]['body'])) {
+                        unset($this->blocks[$block]);
+                    }
+                    elseif (isset($blocks[$block]['body'])) {
+                        unset($blocks[$block]);
+                    }
+                    
+                    $blockStartBoundary = preg_quote(
+                        $this->blocks[$block]['start_tag']
+                    );
+                    
+                    $blockEndBoundary = preg_quote(
+                        $this->blocks[$block]['end_tag']
+                    );
+
+                    // extract body
+                    if (preg_match(
+                        "~$blockStartBoundary\s*(.*?)\s*$blockEndBoundary~",
+                        $this->content[$i],
+                        $match
+                    )) {
+                        $this->blocks[$block]['body'] = [$match[1]];
+                    }
+
+                    $this->content[$i] =
+                        preg_replace(
+                            "~$blockStartBoundary\s*(.*?)\s*$blockEndBoundary~",
+                            '',
+                            $this->content[$i]
+                        );
+                    
+                    $line = $this->content[$i];
+                    $lines = $this->content;
+                }
+
                 if (empty($currentBlock) && 
                     preg_match(
                         '~{% block ([\"|\']+)([a-zA-Z0-9\.\-\_]+)(\1) %}~',
@@ -369,7 +391,7 @@ class BlocksParser implements ParserInterface
                     // to show block's content from parent template , we simply
                     // remove the block from the current template
                     if (isset($this->blocks[$currentBlock]['body'])) {
-                        unset($blocks[$currentBlock]);
+                        unset($this->blocks[$currentBlock]);
                     }
 
                     $currentBlock = '';

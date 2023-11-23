@@ -497,7 +497,7 @@ $output = $engine->render('app', [
     {% define $x = 5 %}
 {% end_for %}
 
-{% block '..... %}
+{% block '.....' %}
     {% define $x = 5 %}
 {% end_block %}
 ```

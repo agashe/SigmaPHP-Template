@@ -1102,10 +1102,13 @@ class LoopsParser implements ParserInterface
     private function noMoreLoops()
     {
         foreach ($this->content as $line) {
-            if (strpos($line, '{% for') !== false ||
-                strpos($line, '{% break') !== false ||
-                strpos($line, '{% continue') !== false ||
-                strpos($line, '{% end_for') !== false
+            if (preg_match('~{% for \$([a-zA-Z0-9_]+) in (.*?) %}~', $line) ||
+                preg_match('~{% break \((.*?)\) %}~', $line) ||
+                preg_match('~{% break \((.*?)\) \<([0-9]+)\> %}~', $line) ||
+                preg_match('~{% continue \((.*?)\) %}~', $line) ||
+                preg_match('~{% continue \((.*?)\) \<([0-9]+)\> %}~', $line) ||
+                preg_match('~{% end_for ([0-9]+) %}~', $line) ||
+                preg_match('~{% end_for %}~', $line)
             ) {
                 return false;
             }

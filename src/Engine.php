@@ -194,6 +194,17 @@ class Engine implements EngineInterface
                 "Invalid callback function for custom directive [{$name}]"
             );
         }
+        
+        if (in_array($name, [
+            'extend', 'include', 'show_block', 'block', 'end_block',
+            'define', 'if', 'else_if', 'else', 'end_if',
+            'for', 'break', 'continue', 'end_for'
+        ])) {
+            throw new InvalidArgumentException(
+                "Can't use reserved word as a name " . 
+                "for custom directive [{$name}]"
+            );
+        }
 
         $this->customDirectives[$name] = $callback;
     }
@@ -669,6 +680,8 @@ class Engine implements EngineInterface
                         "in template [{$this->template}]"
                     );
                 }
+
+                $arguments = [];
 
                 if (isset($match[2]) && !empty($match[2])) {
                     $arguments = explode(',', $match[2]);

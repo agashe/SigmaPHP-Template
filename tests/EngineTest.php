@@ -310,6 +310,16 @@ class EngineTest extends TestCase
             return $sum;
         });
 
+        $this->engine->registerCustomDirective('formatAmount', 
+            function ($amount) {
+                return $amount . '$';
+            }
+        );
+        
+        $this->engine->registerCustomDirective('year', function () {
+            return 2023;
+        });
+
         $this->assertTrue($this->checkOutput(
             $this->renderTemplate('directives'),
             $this->getTemplateResult('directives')
@@ -317,7 +327,7 @@ class EngineTest extends TestCase
     }
 
     /**
-     * Test engine will through exception if the custom directive callback is 
+     * Test engine will through exception if the custom directive's callback is 
      * invalid.
      *
      * @runInSeparateProcess
@@ -328,6 +338,20 @@ class EngineTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
 
         $this->engine->registerCustomDirective('invalid', '@!#$%');
+    }
+    
+    /**
+     * Test engine will through exception if the custom directive's name is 
+     * a reserved word.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testEngineThroughExceptionIfDirectiveNameIsReservedWord()
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        $this->engine->registerCustomDirective('break', function () {});
     }
 
     /**

@@ -20,3 +20,6 @@ text before {% block 'one' %} block one {% block 'two' %} block two  {% end_bloc
 
 {-- #4 : show blocks  --}
 {%          show_block                      '_bar_'                       %}
+
+{-- #5 : skip empty lines in block's body --}
+show block foo : {% show_block 'foo' %}

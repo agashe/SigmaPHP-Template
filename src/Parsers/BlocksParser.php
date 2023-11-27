@@ -336,6 +336,7 @@ class BlocksParser implements ParserInterface
                 // extract the content and skip the block tags
                 if (!empty($currentBlock)) {
                     $cleanLine = $line;
+                    $firstLineIsEmpty = false;
 
                     if (strpos($line, $blocks[$currentBlock]['start_tag']) 
                         !== false
@@ -350,6 +351,14 @@ class BlocksParser implements ParserInterface
                         // all the text before the block's start tag
                         // is just normal text to be printed
                         $cleanLine = $lineParts[1];
+
+                        // in case the first line of the block is just empty
+                        // line don't append it , in case of inline show block, 
+                        // the line will be braked and the useful content will
+                        // be hidden
+                        if (empty($cleanLine)) {
+                            $firstLineIsEmpty = true;
+                        }
 
                         // this line now will only contain all the text BEFORE
                         // the start tag
@@ -376,7 +385,9 @@ class BlocksParser implements ParserInterface
                         $this->content[$i] = '';
                     }
 
-                    $blocks[$currentBlock]['body'][] = $cleanLine;
+                    if (!$firstLineIsEmpty) {
+                        $blocks[$currentBlock]['body'][] = trim($cleanLine);
+                    }
                 }
 
                 // here we check for the matching closing tag

@@ -634,7 +634,7 @@ class Engine implements EngineInterface
                         "in template [{$this->template}]"
                     );
                 }
-                
+
                 $blockBody = $this->blocksParser->blocks[$match[2]]['body'];
 
                 // we replace the 'show_block' part with the block's first line

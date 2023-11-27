@@ -76,6 +76,7 @@ class EngineTest extends TestCase
             if (!isset($expected[$i]) ||
                 trim($actual[$i]) != trim($expected[$i])
             ) {
+                var_dump($actual[$i], $expected[$i]);
                 return false;
             }
         }

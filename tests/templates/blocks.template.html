@@ -10,6 +10,14 @@
     {% block 'block-test1' %}
         test1
     {% end_block %}
+    
+    {% block '.block' %}
+        .block
+    {% end_block %}
+    
+    {% block '15block' %}
+        15block
+    {% end_block '15block' %}
 {% end_block '_bar_' %}
 
 {% show_block 'foo' %}

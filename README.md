@@ -419,10 +419,11 @@ Now no exceptions will be thrown , and the app will run. Also in the `app` templ
 
 Please note that child's blocks content , will always override parent's block content !! So in the previous example assume js block had some content in the `master` , all will be overridden by the `app` js block's content.
 
-As for blocks naming , all litters capital/small , number and _ . - are allowed , so all the following names are valid :
+As for blocks naming , all litters capital/small , number and _ . - are allowed , so all the following names are valid and please note that <ins>block's name can't be just a number</ins> , but could start with a number:
 
 ```
 {% block 'test1001' %}
+{% block '123test' %}
 {% block 'small_article_container' %}
 {% block 'alert-message' %}
 ```

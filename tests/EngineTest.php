@@ -130,10 +130,12 @@ class EngineTest extends TestCase
             'invalid.blocks.close_tag' => 'TemplateParsingException',
             'invalid.blocks.open_tag' => 'TemplateParsingException',
             'invalid.blocks.tag_labels' => 'TemplateParsingException',
+            'invalid.blocks.name' => 'TemplateParsingException',
 
             'invalid.blocks.inline.close_tag' => 'TemplateParsingException',
             'invalid.blocks.inline.open_tag' => 'TemplateParsingException',
             'invalid.blocks.inline.tag_labels' => 'TemplateParsingException',
+            'invalid.blocks.inline.name' => 'TemplateParsingException',
 
             'invalid.conditions.close_tag' => 'TemplateParsingException',
             'invalid.conditions.open_tag' => 'TemplateParsingException',

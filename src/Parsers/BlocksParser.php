@@ -82,6 +82,14 @@ class BlocksParser implements ParserInterface
                     '~{% block ([\"|\']+)([a-zA-Z0-9\.\-\_]+)(\1) %}~',
                     $line, $matchStartTag)
                 ) {
+                    // throw exception if the block's name is just a number 
+                    if (is_numeric($matchStartTag[2])) {
+                        throw new TemplateParsingException(
+                            "Invalid block's name [{$matchStartTag[2]}] " . 
+                            "in template [{$this->template}]"
+                        );
+                    }
+                    
                     $blocksStartTag[] = [
                         'tag' => $matchStartTag[0],
                         'name' => $matchStartTag[2]
@@ -189,6 +197,14 @@ class BlocksParser implements ParserInterface
                 '~{% block ([\"|\']+)([a-zA-Z0-9\.\-\_]+)(\1) %}~',
                 $line, $matchStartTag))
             {
+                // throw exception if the block's name is just a number 
+                if (is_numeric($matchStartTag[2])) {
+                    throw new TemplateParsingException(
+                        "Invalid block's name [{$matchStartTag[2]}] " . 
+                        "in template [{$this->template}]"
+                    );
+                }
+
                 $blocksStartTag[] = [
                     'tag' => $matchStartTag[0],
                     'name' => $matchStartTag[2]

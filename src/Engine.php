@@ -149,10 +149,10 @@ class Engine implements EngineInterface
         }
 
         // init parsers
-        $this->blocksParser->template = $template;
-        $this->conditionsParser->template = $template;
-        $this->loopsParser->template = $template;
-        $this->variablesParser->template = $template;
+        $this->blocksParser->template = $this->template;
+        $this->conditionsParser->template = $this->template;
+        $this->loopsParser->template = $this->template;
+        $this->variablesParser->template = $this->template;
 
         $this->blocksParser->blocks = [];
         

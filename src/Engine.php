@@ -132,7 +132,9 @@ class Engine implements EngineInterface
         $this->data = array_merge($this->sharedVariables, $data);
 
         // prefix template's name
-        $this->template = $template . '.' . self::TEMPLATE_FILE_EXTENSION;
+        $this->template = $this->templatesPath . '/' . 
+            str_replace('.', '/', $template) . '.' .
+            self::TEMPLATE_FILE_EXTENSION;
 
         // load cache if enabled
         if (!empty($this->cachePath)) {
@@ -259,11 +261,9 @@ class Engine implements EngineInterface
             file_get_contents($templateFullPath)  
         ));
 
-        // handle relative path in the new content
-        // assume we have 'admin.views.dashboard'
-        // we extract only the 'admin.views' part
-        // then join it to the extend/include
-        // in the extended/included template
+        // handle relative path in the new content , assume we have :
+        // 'admin.views.dashboard' we extract only the 'admin.views' part
+        // then join it to the extend/include in the extended/included template
         $path = explode('.', $templateFileName);
         unset($path[count($path) - 1]);
         $path = implode('.', $path);

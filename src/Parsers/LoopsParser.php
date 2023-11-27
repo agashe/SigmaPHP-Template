@@ -548,7 +548,7 @@ class LoopsParser implements ParserInterface
 
             // return the content line , with the processed loops
             $this->content[$lineNumber] = $textBeforeLoop .
-                implode(' ', $inlineLoopBlock);
+                implode('', $inlineLoopBlock);
         }
     }
 
@@ -579,13 +579,13 @@ class LoopsParser implements ParserInterface
             $loopEndBoundary = preg_quote($loop['end']['tag']);
 
             preg_match(
-                "~$loopStartBoundary\s*(.*?)\s*$loopEndBoundary~",
+                "~$loopStartBoundary(\s*.*?\s*)$loopEndBoundary~",
                 $this->content[$loop['start']['line']],
                 $match
             );
             
             $loopBody = $match[1];
-            
+
             // remove the 'break' and 'continue'
             foreach ($loop['break'] as $breakStatement) {
                 $loopBody = str_replace(
@@ -626,7 +626,7 @@ class LoopsParser implements ParserInterface
                 // handle nested loops , we remove them temporarily to evaluate
                 // the current body then we get them back
                 $loopBodyWithoutNestedLoops = preg_replace(
-                    "~{% for (.*?) %}\s*(.*?)\s*{% end_for %}~",
+                    "~{% for (.*?) %}(\s*.*?\s*){% end_for %}~",
                     '',
                     $loopBlock
                 );
@@ -682,7 +682,7 @@ class LoopsParser implements ParserInterface
                         $this->data
                     );
                 } else {
-                    $updatedLoopBody = ' ' . $loopBlock . ' ';
+                    $updatedLoopBody = $loopBlock;
                 }
 
                 // for nested loops we save the current value
@@ -708,7 +708,7 @@ class LoopsParser implements ParserInterface
 
             $this->content[$loop['start']['line']] =
                 preg_replace(
-                    "~$loopStartBoundary\s*(.*?)\s*$loopEndBoundary~",
+                    "~$loopStartBoundary(\s*.*?\s*)$loopEndBoundary~",
                     $loopBlockContent,
                     $this->content[$loop['start']['line']]
                 );

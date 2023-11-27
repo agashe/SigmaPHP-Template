@@ -1,8 +1,8 @@
-I have some litters : {% for $litter in 'abcd' %} {% continue ($litter == 'c') %} {{ $litter }} {% end_for %} thanks
+I have some litters : {% for $litter in 'abcd' %}{% continue ($litter == 'c') %}{{ $litter }} {% end_for %} thanks
 
 {% for $i in 2 %} {% for $j in 2 %} {% for $k in 2 %} {{$i * $j * $k}} {% end_for %} {% end_for %} {% end_for %}
 
-{% for $item in $items %} {{ $item }} {% end_for %}
+{% for $item in $items %}{{ $item }} {% end_for %}
 
 {% for $i in 2 %} {% for $j in 2 %} {% if ($j == 2) %} {{$i * $j}} {% end_if %} {% end_for %} {% end_for %}
 

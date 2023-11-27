@@ -142,7 +142,7 @@ class BlocksParser implements ParserInterface
 
                     // save the line again
                     $this->content[$lineNumber] = $textBeforeBlock . 
-                        implode(' ', $inlineBlock);
+                        implode('', $inlineBlock);
                 }
             }
 
@@ -302,7 +302,7 @@ class BlocksParser implements ParserInterface
 
                     // extract body
                     if (preg_match(
-                        "~$blockStartBoundary\s*(.*?)\s*$blockEndBoundary~",
+                        "~$blockStartBoundary(\s*.*?\s*)$blockEndBoundary~",
                         $this->content[$i],
                         $match
                     )) {
@@ -311,7 +311,7 @@ class BlocksParser implements ParserInterface
 
                     $this->content[$i] =
                         preg_replace(
-                            "~$blockStartBoundary\s*(.*?)\s*$blockEndBoundary~",
+                            "~$blockStartBoundary(\s*.*?\s*)$blockEndBoundary~",
                             '',
                             $this->content[$i]
                         );

@@ -119,10 +119,10 @@ class ExpressionEvaluator implements ExpressionEvaluatorInterface
                 $matchExpression[0]));
             
             $result = self::execute($expression, $data);
-            
+
             $line = str_replace(
                 $matchExpression[0],
-                ' ' . $result . ' ',
+                $result,
                 $line
             );
         }

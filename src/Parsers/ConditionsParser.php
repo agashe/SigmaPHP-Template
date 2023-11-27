@@ -208,7 +208,7 @@ class ConditionsParser implements ParserInterface
 
                     // save the line again
                     $this->content[$lineNumber] = $textBeforeCondition . 
-                        implode(' ', $inlineConditionBlock);
+                        implode('', $inlineConditionBlock);
                 }
             }
         }
@@ -300,7 +300,7 @@ class ConditionsParser implements ParserInterface
                 $conditionContent = '';
                 
                 preg_match(
-                    "~$startBoundary\s*(.*?)\s*$endBoundary~", 
+                    "~$startBoundary(\s*.*?\s*)$endBoundary~", 
                     $this->content[$condition['start']['line']],
                     $conditionContent
                 );
@@ -308,14 +308,14 @@ class ConditionsParser implements ParserInterface
                 if (isset($conditionContent[1])) {
                     $this->content[$condition['start']['line']] =
                         preg_replace(
-                            "~$ifStartBoundary\s*(.*?)\s*$ifEndBoundary~",
+                            "~$ifStartBoundary(\s*.*?\s*)$ifEndBoundary~",
                             $conditionContent[1],
                             $this->content[$condition['start']['line']]
                         );
                 } else {
                     $this->content[$condition['start']['line']] =
                         preg_replace(
-                            "~$ifStartBoundary\s*(.*?)\s*$ifEndBoundary~",
+                            "~$ifStartBoundary(\s*.*?\s*)$ifEndBoundary~",
                             '',
                             $this->content[$condition['start']['line']]
                         );
@@ -357,7 +357,7 @@ class ConditionsParser implements ParserInterface
                             $conditionContent = '';
                 
                             preg_match(
-                                "~$startBoundary\s*(.*?)\s*$endBoundary~", 
+                                "~$startBoundary(\s*.*?\s*)$endBoundary~", 
                                 $this->content[$condition['start']['line']],
                                 $conditionContent
                             );
@@ -365,8 +365,8 @@ class ConditionsParser implements ParserInterface
                             if (isset($conditionContent[1])) {
                                 $this->content[$condition['start']['line']] =
                                     preg_replace(
-                                        "~$ifStartBoundary\s*" .
-                                        "(.*?)\s*$ifEndBoundary~",
+                                        "~$ifStartBoundary" .
+                                        "(\s*.*?\s*)$ifEndBoundary~",
                                         $conditionContent[1],
                                         $this->content[
                                             $condition['start']['line']
@@ -375,8 +375,8 @@ class ConditionsParser implements ParserInterface
                             } else {
                                 $this->content[$condition['start']['line']] =
                                     preg_replace(
-                                        "~$ifStartBoundary\s*" .
-                                        "(.*?)\s*$ifEndBoundary~",
+                                        "~$ifStartBoundary" .
+                                        "(\s*.*?\s*)$ifEndBoundary~",
                                         '',
                                         $this->content[
                                             $condition['start']['line']
@@ -403,7 +403,7 @@ class ConditionsParser implements ParserInterface
                         $conditionContent = '';
                         
                         preg_match(
-                            "~$startBoundary\s*(.*?)\s*$endBoundary~", 
+                            "~$startBoundary(\s*.*?\s*)$endBoundary~", 
                             $this->content[$condition['start']['line']],
                             $conditionContent
                         );
@@ -411,16 +411,16 @@ class ConditionsParser implements ParserInterface
                         if (isset($conditionContent[1])) {
                             $this->content[$condition['start']['line']] =
                                 preg_replace(
-                                    "~$ifStartBoundary\s*" .
-                                    "(.*?)\s*$ifEndBoundary~",
+                                    "~$ifStartBoundary" .
+                                    "(\s*.*?\s*)$ifEndBoundary~",
                                     $conditionContent[1],
                                     $this->content[$condition['start']['line']]
                                 );
                         } else {
                             $this->content[$condition['start']['line']] =
                                 preg_replace(
-                                    "~$ifStartBoundary\s*" .
-                                    "(.*?)\s*$ifEndBoundary~",
+                                    "~$ifStartBoundary" .
+                                    "(\s*.*?\s*)$ifEndBoundary~",
                                     '',
                                     $this->content[$condition['start']['line']]
                                 );
@@ -429,7 +429,7 @@ class ConditionsParser implements ParserInterface
                         // if no 'else_if' or 'else' , delete the whole block
                         $this->content[$condition['start']['line']] =
                             preg_replace(
-                                "~$ifStartBoundary\s*(.*?)\s*$ifEndBoundary~",
+                                "~$ifStartBoundary(\s*.*?\s*)$ifEndBoundary~",
                                 '',
                                 $this->content[$condition['start']['line']]
                             );

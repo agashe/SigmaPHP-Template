@@ -452,8 +452,12 @@ class Engine implements EngineInterface
     {
         foreach ($this->content as $i => $line) {
             // handle spaces in the tags properly
-            $line = preg_replace(['~{%~', '~%}~'], ['{% ', ' %}'], $line);
-            $line = preg_replace('/\s+/', ' ', $line);
+            $line = preg_replace(
+                ['~{%\s*~', '~\s*%}~', '~define\s*~' , 
+                    '~show_block\s*~', '~\s+=\s+~',],
+                ['{% ', ' %}', 'define ', 'show_block ', ' = '], 
+                $line
+            );
 
             // check if the statement is valid
             if (strpos($line, '{%') !== false) {
@@ -639,6 +643,12 @@ class Engine implements EngineInterface
                 // to the updated content
                 if (count($blockBody) < 2) {
                     $line = str_replace($match[0], $blockBody[0], $line);
+
+                    $line = ExpressionEvaluator::executeLine(
+                        $line, 
+                        $this->data
+                    );
+                    
                     $blockBody[0] = $line;
                 } else {
                     $lineParts = explode($match[0], $line);
@@ -646,15 +656,14 @@ class Engine implements EngineInterface
 
                     $blockBody[0] = $lineParts[0] . $blockBody[0];
                     $blockBody[count($blockBody) - 1] =  
-                        $blockBody[count($blockBody) - 1] . $lineParts[1]
-                        ;
+                        $blockBody[count($blockBody) - 1] . $lineParts[1];
                 }
 
                 // save the update to the content 
                 $this->content[$i] = $line;
 
                 $updatedContent = array_merge($updatedContent, $blockBody);
-                
+
                 $recheck = true;
             }
             

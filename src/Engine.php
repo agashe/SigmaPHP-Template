@@ -132,7 +132,7 @@ class Engine implements EngineInterface
         $this->data = array_merge($this->sharedVariables, $data);
 
         // prefix template's name
-        $this->template = $this->templatesPath . '/' . 
+        $this->template = '/' . $this->templatesPath . '/' . 
             str_replace('.', '/', $template) . '.' .
             self::TEMPLATE_FILE_EXTENSION;
 

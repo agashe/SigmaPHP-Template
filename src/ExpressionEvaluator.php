@@ -44,13 +44,19 @@ class ExpressionEvaluator implements ExpressionEvaluatorInterface
             '~([\"|\'\`]+)(.*?)(\1)~',
             '~\$([a-zA-Z0-9_]+)~'
         ], '', $expression);
+        
+        // we check here using the regex "b" option to make sure in the edge 
+        // cases such "as" that we gonna search for the exact word , not 
+        // partially , like if you have a variable called $last , the expression
+        // evaluator will consider it invalid since it has "as" inside :D
+        $pattern = '/\b(' . 
+            implode('|', array_map('preg_quote', self::$blackList)) . 
+            ')\b/i';
 
-        foreach (self::$blackList as $keyword) {
-            if (strpos($expressionFiltered, $keyword) !== false) {
-                throw new InvalidExpressionException(
-                    "Invalid expression : ({$expression})"
-                );
-            }
+        if (preg_match($pattern, $expressionFiltered) === 1) {
+            throw new InvalidExpressionException(
+                "Invalid expression : ({$expression})"
+            );
         }
 
         extract($data);

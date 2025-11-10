@@ -453,7 +453,7 @@ class Engine implements EngineInterface
         foreach ($this->content as $i => $line) {
             // handle spaces in the tags properly
             $line = preg_replace(
-                ['~{%\s*~', '~\s*%}~', '~define\s*~' , 
+                ['~{%\s*~', '~\s*%}~', '~define\s+~' , 
                     '~show_block\s*~', '~\s+=\s+~',],
                 ['{% ', ' %}', 'define ', 'show_block ', ' = '], 
                 $line

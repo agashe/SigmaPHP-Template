@@ -75,3 +75,11 @@
 {% define $x =          1000 %} {% if (1) %}{{$x}}{% end_if %}
 
 {% define $foo = true %}
+
+{% if (!isset($undefined)) %} 
+    undefined
+{% end_if %}
+
+{% if (empty($undefined)) %} 
+    undefined is empty
+{% end_if %}

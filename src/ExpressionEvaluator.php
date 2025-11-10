@@ -68,9 +68,14 @@ class ExpressionEvaluator implements ExpressionEvaluatorInterface
 
         foreach ($matches[1] as $match) {
             if (!isset(${$match})) {
-                throw new UndefinedVariableException(
-                    "Undefined variable : $$match"
-                );
+                // check if the var is not wrapped within isset() or empty()
+                if (strpos($expression, "isset($$match)") === false &&
+                    strpos($expression, "empty($$match)") === false
+                ) {
+                    throw new UndefinedVariableException(
+                        "Undefined variable : $$match"
+                    );
+                }
             }
         }
 

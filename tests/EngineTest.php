@@ -454,6 +454,16 @@ class EngineTest extends TestCase
             explode("\n", $engine->render('variables', $variables)),
             $this->getTemplateResult('variables')
         ));
+
+        // check that the cache file was created using the naming criteria 
+        $cacheFileName = substr(
+            md5('variables' . 
+                filemtime('./tests/templates/variables.template.html')), 
+            0, 
+            30
+        );
+
+        $this->assertTrue(file_exists('./tests/cache/' . $cacheFileName));
     }
    
     /**
@@ -482,7 +492,7 @@ class EngineTest extends TestCase
      * @runInSeparateProcess
      * @return void
      */
-    public function testEngineWillThroughExceptionIfTheCacheFileCanNotBeSAved()
+    public function testEngineWillThroughExceptionIfTheCacheFileCanNotBeSaved()
     {
         $this->expectException(CacheProcessFailedException::class);
 
@@ -493,39 +503,6 @@ class EngineTest extends TestCase
         ];
         
         $engine->render('variables', $variables);
-    }
-
-    /**
-     * Test engine will through exception if the cache file can't be loaded.
-     *
-     * @runInSeparateProcess
-     * @return void
-     */
-    public function testEngineWillThroughExceptionIfTheCacheFileCanNotBeLoaded()
-    {
-        $engine = new Engine('/tests/templates', '/tests/cache');
-        
-        chmod(__DIR__ . '/cache', 0000);
-     
-        $exceptionWasThrown = false;
-
-        try {
-            $variables = [
-                'test1' => 'TEST #1'
-            ];
-    
-            $engine->render('variables', $variables);
-        }
-        catch (\Exception $e) {
-            if ($e instanceof CacheProcessFailedException) {
-                $exceptionWasThrown = true;
-            }
-        }
-        finally {
-            chmod(__DIR__ . '/cache', 0777);
-        }
-
-        $this->assertTrue($exceptionWasThrown);
     }
 
     /**

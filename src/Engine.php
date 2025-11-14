@@ -3,7 +3,6 @@
 namespace SigmaPHP\Template;
 
 use InvalidArgumentException;
-use SigmaPHP\Template\Exceptions\CacheProcessFailedException;
 use SigmaPHP\Template\Exceptions\InvalidStatementException;
 use SigmaPHP\Template\Exceptions\TemplateNotFoundException;
 use SigmaPHP\Template\Exceptions\TemplateParsingException;
@@ -14,6 +13,7 @@ use SigmaPHP\Template\Parsers\BlocksParser;
 use SigmaPHP\Template\Parsers\ConditionsParser;
 use SigmaPHP\Template\Parsers\LoopsParser;
 use SigmaPHP\Template\Parsers\VariablesParser;
+use SigmaPHP\Template\Cache;
 
 /**
  * Template Engine Class 
@@ -86,19 +86,26 @@ class Engine implements EngineInterface
     private $sharedVariables;
 
     /**
+     * @var Cache $cache
+     */
+    private $cache;
+
+    /**
      * Template Engine Constructor.
      * 
      * @param string $templatesPath
+     * @param string $cachePath
      */
-    public function __construct($templatesPath = '', $cachePath = '') {
+    public function __construct($templatesPath = '', $cachePath = '')
+    {
         $this->basePath = dirname(
             (new \ReflectionClass(
                 \Composer\Autoload\ClassLoader::class
             ))->getFileName()
         , 3);
         
-        $this->templatesPath = trim($templatesPath, '/');
-        $this->cachePath = trim($cachePath, '/');
+        $this->templatesPath = trim($templatesPath, './');
+        $this->cachePath = trim($cachePath, './');
 
         $this->blocksParser = new BlocksParser();
         $this->conditionsParser = new ConditionsParser();
@@ -107,6 +114,8 @@ class Engine implements EngineInterface
 
         $this->customDirectives = [];
         $this->sharedVariables = [];
+
+        $this->cache = new Cache($this->basePath, $this->cachePath);
     }
 
     /**
@@ -117,38 +126,21 @@ class Engine implements EngineInterface
      * @param bool $print
      * @return string|void
      */
-    final public function render($template, $data = [], $print = false)
+    public function render($template, $data = [], $print = false)
     {
         // in case the developer used './' with the render method
         // we remove it since it points to the relative base path
         // which in this case the path to templates  
         $template = str_replace('./', '', $template);
 
-        $this->content = $this->getTemplateContent($template);
+        // prefix template's name
+        $this->template = $this->getTemplateFullPath($template);
 
-        $contentBeforeProcessing = $this->content;
+        // load the template's content
+        $this->content = $this->getTemplateContent($template);
 
         // merge the shared variables 
         $this->data = array_merge($this->sharedVariables, $data);
-
-        // prefix template's name
-        $this->template = '/' . $this->templatesPath . '/' . 
-            str_replace('.', '/', $template) . '.' .
-            self::TEMPLATE_FILE_EXTENSION;
-
-        // load cache if enabled
-        if (!empty($this->cachePath)) {
-            $content = $this->loadCache($contentBeforeProcessing, $data);
-
-            if ($content !== false) {
-                if ($print) {
-                    print $content;
-                    return;
-                }
-                
-                return $content;
-            }
-        }
 
         // init parsers
         $this->blocksParser->template = $this->template;
@@ -169,11 +161,6 @@ class Engine implements EngineInterface
         // print or return the processed template
         $content = implode("\n", $this->content);
 
-        // save cache if enabled
-        if (!empty($this->cachePath)) {
-            $this->saveCache($contentBeforeProcessing, $data, $content);
-        }
-
         if ($print) {
             print $content;
             return;
@@ -189,7 +176,7 @@ class Engine implements EngineInterface
      * @param callable $callback
      * @return void
      */
-    final public function registerCustomDirective($name, $callback)
+    public function registerCustomDirective($name, $callback)
     {
         if (!is_callable($callback)) {
             throw new InvalidArgumentException(
@@ -217,7 +204,7 @@ class Engine implements EngineInterface
      * @param array $variables
      * @return void
      */
-    final public function setSharedVariables($variables)
+    public function setSharedVariables($variables)
     {
         if (!is_array($variables)) {
             throw new InvalidArgumentException(
@@ -238,20 +225,29 @@ class Engine implements EngineInterface
      */
     private function getTemplateContent($templateFileName)
     {
-        // in case the template is in a sub-directory
-        // we use dot-notation , but it's just the matter of
-        // replace the dots with slashes to get the correct path 
-        $templateFileNameFormatted = str_replace('.', '/', $templateFileName);
-
-        $templateFullPath = $this->basePath . '/' .
-            $this->templatesPath . '/' .
-            $templateFileNameFormatted. '.' .
-            self::TEMPLATE_FILE_EXTENSION;
+        $templateFullPath = $this->getTemplateFullPath($templateFileName);
         
         if (!file_exists($templateFullPath)) {
             throw new TemplateNotFoundException(
                 "The requested template [{$templateFullPath}] doesn't exist"
             );
+        }
+
+        // load cache if enabled , and we have cache hit , otherwise proceed 
+        // with fresh processing
+        if (!empty($this->cachePath)) {
+            $cachedContent = $this->cache->load(
+                $templateFileName,
+                filemtime($templateFullPath)
+            );
+
+            if ($cachedContent !== false) {
+                return explode("\n", str_replace(
+                    ["\n\r", "\r"],
+                    "\n",
+                    $cachedContent
+                ));
+            }
         }
 
         // clean lines break and return the content as array 
@@ -269,6 +265,15 @@ class Engine implements EngineInterface
         $path = implode('.', $path);
 
         $content = $this->handleRelativePAth($content, $path);
+
+        // save cache if enabled
+        if (!empty($this->cachePath)) {
+            $this->cache->save(
+                $templateFileName,
+                filemtime($templateFullPath),
+                file_get_contents($templateFullPath)
+            );
+        }
 
         return $content;
     }
@@ -292,51 +297,22 @@ class Engine implements EngineInterface
     }
     
     /**
-     * Save processed content for template as cache file. 
+     * Get template's full path.
      * 
-     * @param array $content
-     * @param array $data
-     * @param string $output
-     * @return void
+     * @param string $template
+     * @return string
      */
-    private function saveCache($content, $data, $output)
+    private function getTemplateFullPath($template)
     {
-        $cacheFilePath = $this->basePath . '/' . $this->cachePath . '/' . 
-            substr(md5(implode("\n", $content) . json_encode($data)), 0, 30);
+        // in case the template is in a sub-directory
+        // we use dot-notation , but it's just the matter of
+        // replace the dots with slashes to get the correct path 
+        $templateFileNameFormatted = str_replace('.', '/', $template);
 
-        try {
-            fopen($cacheFilePath, 'w');
-            file_put_contents($cacheFilePath, $output);
-        } catch (\Exception $e) {
-            throw new CacheProcessFailedException(
-                "Can't save cache file for template [{$this->template}]"
-            );
-        }
-    }
-
-    /**
-     * Load processed content for template from a cache file. 
-     * 
-     * @param array $content
-     * @param array $data
-     * @return string|bool
-     */
-    private function loadCache($content, $data)
-    {
-        $cacheFilePath = $this->basePath . '/' . $this->cachePath . '/' . 
-            substr(md5(implode("\n", $content) . json_encode($data)), 0, 30);
-
-        if (is_file($cacheFilePath)) {
-            try {
-                return file_get_contents($cacheFilePath);
-            } catch (\Exception $e) {
-                throw new CacheProcessFailedException(
-                    "Can't load cache file for template [{$this->template}]"
-                );
-            }
-        }
-
-        return false;
+        return $this->basePath . '/' .
+            $this->templatesPath . '/' .
+            $templateFileNameFormatted. '.' .
+            self::TEMPLATE_FILE_EXTENSION;
     }
 
     /**
@@ -666,8 +642,8 @@ class Engine implements EngineInterface
 
                 $recheck = true;
             }
-            
-            // process variables and expressions
+                        
+            // process variables
             if (preg_match('~{{(.*?)}}~', $line, $match)) {
                 $line = ExpressionEvaluator::executeLine(
                     $line, 
@@ -679,7 +655,7 @@ class Engine implements EngineInterface
                 $updatedContent[] = $line;
             }
             
-            // process variables and expressions
+            // process expressions and custom directives
             if (preg_match('~{%\s*([a-zA-Z0-9\_]+)\((.*?)\)\s*%}~',
                 $line, $match)
             ) {

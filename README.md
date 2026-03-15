@@ -24,8 +24,6 @@ composer require agashe/sigmaphp-template
 
 ## Documentation
 
-## Documentation
-
 #### Table of Contents  
 * [Basic Usage](#basic-usage)
 * [Template Files](#template-files)

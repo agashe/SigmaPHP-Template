@@ -2,13 +2,13 @@ I have some litters : {% for $litter in 'abcd' %}{% continue ($litter == 'c') %}
 
 {% for $i in 2 %} {% for $j in 2 %} {% for $k in 2 %} {{$i * $j * $k}} {% end_for %} {% end_for %} {% end_for %}
 
-{% for $item in $items %}{{ $item }} {% end_for %}
+{% for $match in $items %}{{ $match }} {% end_for %}
 
 {% for $i in 2 %} {% for $j in 2 %} {% if ($j == 2) %} {{$i * $j}} {% end_if %} {% end_for %} {% end_for %}
 
 Test #1 :
-{% for $litter in 'abcd' %}
-    {{ $litter }}
+{% for $result in 'abcd' %}
+    {{ $result }}
 {% end_for %}
 
 {% for $num in 5 %}
@@ -29,7 +29,7 @@ Test #2 :
 
     {% for $it2 in 2 %}
         <second loop here ----------------- >
-    
+
         {% for $it3 in 2 %}
             <third loop here ----------------- >
         {% end_for %}

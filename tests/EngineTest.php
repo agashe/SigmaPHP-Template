@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 use PHPUnit\Framework\TestCase;
 use SigmaPHP\Template\Engine;
@@ -52,9 +52,9 @@ class EngineTest extends TestCase
 
         if ($print) {
             ob_start();
-            
+
             $this->engine->render($template, $variables, true);
-            
+
             $result = ob_get_clean();
         } else {
             $result = $this->engine->render($template, $variables);
@@ -95,7 +95,7 @@ class EngineTest extends TestCase
         $objectReflection = new \ReflectionClass($object);
         $propertyReflection = $objectReflection->getProperty($property);
         $propertyReflection->setAccessible(true);
-        
+
         return $propertyReflection->getValue($object);
     }
 
@@ -116,13 +116,13 @@ class EngineTest extends TestCase
             'invalid.empty_expression' => 'InvalidExpressionException',
             'invalid.extend' => 'TemplateNotFoundException',
             'invalid.directives' => 'UndefinedDirectiveException',
-            
+
             'invalid.variables.define' => 'InvalidStatementException',
             'invalid.variables.line' => 'TemplateParsingException',
             'invalid.variables.condition' => 'TemplateParsingException',
             'invalid.variables.block' => 'TemplateParsingException',
             'invalid.variables.loop' => 'TemplateParsingException',
-            
+
             'invalid.variables.inline.condition' => 'TemplateParsingException',
             'invalid.variables.inline.block' => 'TemplateParsingException',
             'invalid.variables.inline.loop' => 'TemplateParsingException',
@@ -225,7 +225,7 @@ class EngineTest extends TestCase
             $this->getTemplateResult('variables')
         ));
     }
-    
+
     /**
      * Test extend and include templates.
      *
@@ -282,7 +282,7 @@ class EngineTest extends TestCase
     {
         $variables = [
             'items' => [
-                'item #1', 
+                'item #1',
                 'item #2',
                 'item #3',
             ]
@@ -312,12 +312,12 @@ class EngineTest extends TestCase
             return $sum;
         });
 
-        $this->engine->registerCustomDirective('formatAmount', 
+        $this->engine->registerCustomDirective('formatAmount',
             function ($amount) {
                 return $amount . '$';
             }
         );
-        
+
         $this->engine->registerCustomDirective('year', function () {
             return 2023;
         });
@@ -329,7 +329,7 @@ class EngineTest extends TestCase
     }
 
     /**
-     * Test engine will through exception if the custom directive's callback is 
+     * Test engine will through exception if the custom directive's callback is
      * invalid.
      *
      * @runInSeparateProcess
@@ -341,9 +341,9 @@ class EngineTest extends TestCase
 
         $this->engine->registerCustomDirective('invalid', '@!#$%');
     }
-    
+
     /**
-     * Test engine will through exception if the custom directive's name is 
+     * Test engine will through exception if the custom directive's name is
      * a reserved word.
      *
      * @runInSeparateProcess
@@ -373,7 +373,7 @@ class EngineTest extends TestCase
                 ['name' => 'about', 'url' => '/path/to/about'],
             ]
         ];
-        
+
         $this->assertTrue($this->checkOutput(
             $this->renderTemplate('full.app', $variables),
             $this->getTemplateResult('app')
@@ -406,7 +406,7 @@ class EngineTest extends TestCase
             'foo' => 'ahmed',
             'boo' => 'ali',
             'items' => [
-                'item #1', 
+                'item #1',
                 'item #2',
                 'item #3',
             ],
@@ -435,7 +435,7 @@ class EngineTest extends TestCase
             $this->getTemplateResult('basic')
         ));
     }
-    
+
     /**
      * Test save cache.
      *
@@ -445,7 +445,7 @@ class EngineTest extends TestCase
     public function testSaveCache()
     {
         $engine = new Engine('/tests/templates', '/tests/cache');
-        
+
         $variables = [
             'test1' => 'TEST #1'
         ];
@@ -455,17 +455,17 @@ class EngineTest extends TestCase
             $this->getTemplateResult('variables')
         ));
 
-        // check that the cache file was created using the naming criteria 
+        // check that the cache file was created using the naming criteria
         $cacheFileName = substr(
-            md5('variables' . 
-                filemtime('./tests/templates/variables.template.html')), 
-            0, 
+            md5('variables' .
+                filemtime('./tests/templates/variables.template.html')),
+            0,
             30
         );
 
         $this->assertTrue(file_exists('./tests/cache/' . $cacheFileName));
     }
-   
+
     /**
      * Test load cache.
      *
@@ -479,13 +479,13 @@ class EngineTest extends TestCase
         $variables = [
             'test1' => 'TEST #1'
         ];
-        
+
         $this->assertTrue($this->checkOutput(
             explode("\n", $engine->render('variables', $variables)),
             $this->getTemplateResult('variables')
         ));
     }
-    
+
     /**
      * Test engine will through exception if the cache file can't be saved.
      *
@@ -497,11 +497,11 @@ class EngineTest extends TestCase
         $this->expectException(CacheProcessFailedException::class);
 
         $engine = new Engine('/tests/templates', '/tests/fake-cache-dir/');
-        
+
         $variables = [
             'test1' => 'TEST #1'
         ];
-        
+
         $engine->render('variables', $variables);
     }
 

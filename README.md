@@ -24,6 +24,27 @@ composer require agashe/sigmaphp-template
 
 ## Documentation
 
+## Documentation
+
+#### Table of Contents  
+* [Basic Usage](#basic-usage)
+* [Template Files](#template-files)
+* [Render Method](#render-method)
+* [Parenthesis & Quotes](#parenthesis--quotes)
+* [Printing Variables](#printing-variables)
+* [Expression Evaluation](#expression-evaluation)
+* [Comments](#comments)
+* [Extend & Include Templates](#extend--include-templates)
+* [Dot Notation Path](#dot-notation-path)
+* [Relative Path](#relative-path)
+* [Blocks](#blocks)
+* [Defining Variables](#defining-variables)
+* [Share Variables](#share-variables)
+* [Conditions](#conditions)
+* [Loops](#loops)
+* [Custom Directives](#custom-directives)
+* [Caching](#caching)
+* [Examples](#examples)
 
 ### Basic Usage
 

@@ -35,9 +35,10 @@ class ExpressionEvaluator implements ExpressionEvaluatorInterface
      *
      * @param string $expression
      * @param array &$data
+     * @param string $template
      * @return mixed
      */
-    public static function execute($expression, &$data)
+    public static function execute($expression, &$data, $template)
     {
         // check is the expression is safe.
         $expressionFiltered = preg_replace([
@@ -55,7 +56,8 @@ class ExpressionEvaluator implements ExpressionEvaluatorInterface
 
         if (preg_match($pattern, $expressionFiltered) === 1) {
             throw new InvalidExpressionException(
-                "Invalid expression : ({$expression})"
+                "Invalid expression : ({$expression})"  .
+                "in template [{$template}]"
             );
         }
 
@@ -73,7 +75,8 @@ class ExpressionEvaluator implements ExpressionEvaluatorInterface
                     strpos($expression, "empty($$_match)") === false
                 ) {
                     throw new UndefinedVariableException(
-                        "Undefined variable : $$_match"
+                        "Undefined variable : $$_match" .
+                        "in template [{$template}]"
                     );
                 }
             }
@@ -102,9 +105,10 @@ class ExpressionEvaluator implements ExpressionEvaluatorInterface
      *
      * @param string $line
      * @param array &$data
+     * @param string $template
      * @return mixed
      */
-    final public static function executeLine($line, &$data)
+    public static function executeLine($line, &$data, $template)
     {
         $lineExpressions = explode('{{', $line);
         unset($lineExpressions[0]);
@@ -122,14 +126,15 @@ class ExpressionEvaluator implements ExpressionEvaluatorInterface
 
             if (empty($matchExpression[1])) {
                 throw new InvalidExpressionException(
-                    "Can't process empty expression on line : [{$line}]"
+                    "Can't process empty expression on line : [{$line}]" .
+                    "in template [{$template}]"
                 );
             }
 
             $expression = trim(str_replace(['{{', '}}'], '',
                 $matchExpression[0]));
 
-            $result = self::execute($expression, $data);
+            $result = self::execute($expression, $data, $template);
 
             $line = str_replace(
                 $matchExpression[0],

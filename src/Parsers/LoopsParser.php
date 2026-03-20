@@ -8,7 +8,7 @@ use SigmaPHP\Template\Interfaces\ParserInterface;
 use SigmaPHP\Template\ExpressionEvaluator;
 
 /**
- * Loops Parser Class 
+ * Loops Parser Class
  */
 class LoopsParser implements ParserInterface
 {
@@ -57,7 +57,7 @@ class LoopsParser implements ParserInterface
 
     /**
      * Extract loop body and remove 'break' and 'continue' statements.
-     * 
+     *
      * @param array $loop
      * @return array
      */
@@ -71,18 +71,19 @@ class LoopsParser implements ParserInterface
             $i = ($loop['start']['line'] + 1);
             $i < $loop['end']['line'];
             $i++
-        ) {           
-            if (preg_match('~<% (.*?)=(.*?) %>~', 
+        ) {
+            if (preg_match('~<% (.*?)=(.*?) %>~',
                 $this->content[$i], $match)
             ) {
                 $this->data[$match[1]] = ExpressionEvaluator::execute(
                     $match[2],
-                    $this->data
+                    $this->data,
+                    $this->template
                 );
             }
         }
 
-        // save text after the loop's start tag , since this is 
+        // save text after the loop's start tag , since this is
         // part of the loop body , need to processed. Same for
         // end tag
         $lineParts = explode(
@@ -92,13 +93,14 @@ class LoopsParser implements ParserInterface
 
         if (preg_match('~{{(.*?)}}~', $lineParts[1])) {
             $loopBody[] = ExpressionEvaluator::executeLine(
-                $lineParts[1], 
-                $this->data
+                $lineParts[1],
+                $this->data,
+                $this->template
             );
         } else {
             $loopBody[] = $lineParts[1];
         }
-        
+
         for (
             $i = ($loop['start']['line'] + 1);
             $i < $loop['end']['line'];
@@ -109,8 +111,9 @@ class LoopsParser implements ParserInterface
                 $this->content[$i])
             ) {
                 $loopBody[] = ExpressionEvaluator::executeLine(
-                    $this->content[$i], 
-                    $this->data
+                    $this->content[$i],
+                    $this->data,
+                    $this->template
                 );
             } else {
                 if (preg_match('~{% break \((.*?)\) \<([0-9]+)\> %}~',
@@ -124,7 +127,7 @@ class LoopsParser implements ParserInterface
 
                     continue;
                 }
-                
+
                 if (preg_match('~{% continue \((.*?)\) \<([0-9]+)\> %}~',
                     $this->content[$i], $matchContinue)
                 ) {
@@ -139,16 +142,16 @@ class LoopsParser implements ParserInterface
 
                 $loopBody[] = $this->content[$i];
 
-                // please note : in case the loop has nested loops , we save 
-                // temporarily the current iterator value in '<%%>' syntax , 
-                // then we remove that once the the value is executed in the 
+                // please note : in case the loop has nested loops , we save
+                // temporarily the current iterator value in '<%%>' syntax ,
+                // then we remove that once the the value is executed in the
                 // nested loops
                 if (preg_match('~{% for \$(.*?) in (.*?) %}~',
                     $this->content[$i], $matchStartLoop)
                 ) {
                     $hasInnerLoop = true;
 
-                    $loopBody[] = '<% ' . $loop['start']['value'] . '=' . 
+                    $loopBody[] = '<% ' . $loop['start']['value'] . '=' .
                         $this->data[$loop['start']['value']] . ' %>';
                 }
 
@@ -164,11 +167,12 @@ class LoopsParser implements ParserInterface
             $loop['end']['tag'],
             $this->content[$loop['end']['line']]
         );
-        
+
         if (preg_match('~{{(.*?)}}~', $lineParts[0])) {
             $loopBody[] = ExpressionEvaluator::executeLine(
-                $lineParts[0], 
-                $this->data
+                $lineParts[0],
+                $this->data,
+                $this->template
             );
         } else {
             $loopBody[] = $lineParts[0];
@@ -179,7 +183,7 @@ class LoopsParser implements ParserInterface
 
     /**
      * Check if break expression was resolved in a loop.
-     * 
+     *
      * @param array $loop
      * @return bool
      */
@@ -188,15 +192,16 @@ class LoopsParser implements ParserInterface
         if (empty($loop['break'])) {
             return false;
         }
-        
+
         foreach ($loop['break'] as $breakStatement) {
             $result = ExpressionEvaluator::execute(
-                $breakStatement['expression'], 
-                $this->data
+                $breakStatement['expression'],
+                $this->data,
+                $this->template
             );
 
             if ($result) {
-                return true; 
+                return true;
             }
         }
 
@@ -205,7 +210,7 @@ class LoopsParser implements ParserInterface
 
     /**
      * Check if continue expression was resolved in a loop.
-     * 
+     *
      * @param array $loop
      * @return bool
      */
@@ -217,12 +222,13 @@ class LoopsParser implements ParserInterface
 
         foreach ($loop['continue'] as $continueStatement) {
             $result = ExpressionEvaluator::execute(
-                $continueStatement['expression'], 
-                $this->data
+                $continueStatement['expression'],
+                $this->data,
+                $this->template
             );
 
             if ($result) {
-                return true; 
+                return true;
             }
         }
 
@@ -231,7 +237,7 @@ class LoopsParser implements ParserInterface
 
     /**
      * Get loop id vy matching its start tag.
-     * 
+     *
      * @param string $startTag
      * @return int|bool
      */
@@ -239,7 +245,7 @@ class LoopsParser implements ParserInterface
     {
         foreach ($this->loops as $id => $loop) {
             if ($loop['start']['tag'] == $startTag) {
-                return $id; 
+                return $id;
             }
         }
 
@@ -248,7 +254,7 @@ class LoopsParser implements ParserInterface
 
     /**
      * Get loop iteration group.
-     * 
+     *
      * @param string $expression
      * @return array
      */
@@ -260,9 +266,10 @@ class LoopsParser implements ParserInterface
 
         $expression = ExpressionEvaluator::execute(
             $expression,
-            $this->data
+            $this->data,
+            $this->template
         );
-        
+
         if (is_numeric($expression)) {
             for ($j = 1;$j <= (int) $expression;$j++) {
                 $group[] = (int) $j;
@@ -276,8 +283,8 @@ class LoopsParser implements ParserInterface
         } else {
             // if the expression isn't iterable , throw exception
             throw new InvalidExpressionException(
-                "Invalid loop expression : {$expression} " 
-                . "in template [{$this->template}]"
+                "Invalid loop expression : {$expression} " .
+                "in template [{$this->template}]"
             );
         }
 
@@ -286,7 +293,7 @@ class LoopsParser implements ParserInterface
 
     /**
      * Handle nested inline loops.
-     * 
+     *
      * @return array
      */
     private function handleNestedInlineLoops()
@@ -308,10 +315,10 @@ class LoopsParser implements ParserInterface
             }
 
             // we convert the inline loop into a virtual loop block
-            // we do all the normal process then we implode it again into one 
+            // we do all the normal process then we implode it again into one
             // line
             $inlineLoopBlock = explode('{%', $contentLine);
-            
+
             // remove first element , since it's always empty
             // but we keep the text so we can append again later
             // hen the process is done
@@ -326,7 +333,7 @@ class LoopsParser implements ParserInterface
             foreach ($inlineLoopBlock as $i => $line) {
                 if (preg_match(
                         '~{% for \$([a-zA-Z0-9_]+) in (.*?) \(([0-9]+)\) %}~',
-                        $line, 
+                        $line,
                         $matchStartTag
                     )
                 ) {
@@ -364,17 +371,17 @@ class LoopsParser implements ParserInterface
                     if (!isset($this->data[$matchStartTag[1]])) {
                         $this->data[$matchStartTag[1]] = '';
                     }
-                    
+
                     $counter += 1;
 
                     $skipLoop = false;
                 }
-                
+
                 if (!$skipLoop && preg_match('~{% break \((.*?)\) %}~',
                     $line, $matchBreakTag)
                 ) {
                     // add loop id to the break tag
-                    $updatedBreakTag = '{% break (' . $matchBreakTag[1] . ') <' 
+                    $updatedBreakTag = '{% break (' . $matchBreakTag[1] . ') <'
                         . end($currentStartTags) . '> %}';
 
                     $inlineLoopBlock[$i] = str_replace(
@@ -390,13 +397,13 @@ class LoopsParser implements ParserInterface
                         'line' => $lineNumber
                     ];
                 }
-                
+
                 if (!$skipLoop && preg_match('~{% continue \((.*?)\) %}~',
                     $line, $matchContinueTag)
                 ) {
                     // add loop id to the continue tag
-                    $updatedContinueTag = '{% continue (' . 
-                        $matchContinueTag[1] . ') <' 
+                    $updatedContinueTag = '{% continue (' .
+                        $matchContinueTag[1] . ') <'
                         . end($currentStartTags) . '> %}';
 
                     $inlineLoopBlock = str_replace(
@@ -415,7 +422,7 @@ class LoopsParser implements ParserInterface
 
                 if (!$skipLoop && strpos($line, '{% end_for %}') !== false) {
                     $endingTag = "{% end_for " . end($currentStartTags) . " %}";
-                    
+
                     $inlineLoopBlock[$i] = str_replace(
                         '{% end_for %}',
                         $endingTag,
@@ -428,8 +435,8 @@ class LoopsParser implements ParserInterface
                         $line
                     );
                 }
-                
-                if (!$skipLoop && preg_match('~{% end_for ([0-9]+) %}~', 
+
+                if (!$skipLoop && preg_match('~{% end_for ([0-9]+) %}~',
                     $line, $matchEndTag)
                 ) {
                     $endingTag = $matchEndTag[0];
@@ -440,7 +447,7 @@ class LoopsParser implements ParserInterface
                         'line' => $lineNumber
                     ];
 
-                    // 'break' and 'continue' outside condition block 
+                    // 'break' and 'continue' outside condition block
                     if (!isset($loopStartTag[end($currentStartTags)]) &&
                         isset($breakLoopTag[end($currentStartTags)])
                     ) {
@@ -449,7 +456,7 @@ class LoopsParser implements ParserInterface
                             "in template [{$this->template}]"
                         );
                     }
-                    
+
                     if (!isset($loopStartTag[end($currentStartTags)]) &&
                         isset($continueLoopTag[end($currentStartTags)])
                     ) {
@@ -502,7 +509,7 @@ class LoopsParser implements ParserInterface
                         $breakLoopTag = [];
                         $continueLoopTag = [];
                     }
-                    
+
                     if ((count($currentStartTags) - 1) >= 0) {
                         unset($currentStartTags[count($currentStartTags) - 1]);
                         $currentStartTags = array_values($currentStartTags);
@@ -525,7 +532,7 @@ class LoopsParser implements ParserInterface
                 }
             }
 
-            // 'break' and 'continue' outside loop block 
+            // 'break' and 'continue' outside loop block
             if (count($loopStartTag) == 0 &&
                 count($loopEndTag) == 0 &&
                 count($breakLoopTag) != 0
@@ -535,7 +542,7 @@ class LoopsParser implements ParserInterface
                     "in template [{$this->template}]"
                 );
             }
-            
+
             if (count($loopStartTag) == 0 &&
                 count($loopEndTag) == 0 &&
                 count($continueLoopTag) != 0
@@ -554,7 +561,7 @@ class LoopsParser implements ParserInterface
 
     /**
      * Execute inline loops.
-     * 
+     *
      * @return void
      */
     private function executeInlineLoops()
@@ -568,12 +575,12 @@ class LoopsParser implements ParserInterface
             if (
                 strpos(
                     $this->content[$loop['start']['line']],
-                    '{% for'   
+                    '{% for'
                 ) === false
             ) {
                 continue;
             }
-            
+
             // we use these boundaries to replace the whole loop with the body
             $loopStartBoundary = preg_quote($loop['start']['tag']);
             $loopEndBoundary = preg_quote($loop['end']['tag']);
@@ -583,13 +590,13 @@ class LoopsParser implements ParserInterface
                 $this->content[$loop['start']['line']],
                 $match
             );
-            
+
             $loopBody = $match[1];
 
             // remove the 'break' and 'continue'
             foreach ($loop['break'] as $breakStatement) {
                 $loopBody = str_replace(
-                    $breakStatement['tag'], 
+                    $breakStatement['tag'],
                     '',
                     $loopBody
                 );
@@ -597,24 +604,24 @@ class LoopsParser implements ParserInterface
 
             foreach ($loop['continue'] as $continueStatement) {
                 $loopBody = str_replace(
-                    $continueStatement['tag'], 
+                    $continueStatement['tag'],
                     '',
                     $loopBody
                 );
             }
-            
+
             // prepare the expression , we convert the loop expression
             // to a group of items , so we can start looping
             $group = $this->getLoopIterationGroup($loop['start']['expression']);
-            
+
             $loopBlock = '';
             $loopBlockContent = '';
-            
+
             foreach ($group as $item) {
                 $loopBlock = $loopBody;
-                
+
                 $this->data[$loop['start']['value']] = $item;
-                
+
                 if ($this->breakIsResolved($loop)) {
                     break 1;
                 }
@@ -643,8 +650,9 @@ class LoopsParser implements ParserInterface
                 if (!empty($matches[0])) {
                     foreach ($matches as $match) {
                         $this->data[$match[1]] = ExpressionEvaluator::execute(
-                            $match[2], 
-                            $this->data
+                            $match[2],
+                            $this->data,
+                            $this->template
                         );
 
                         $oldLoopValues .= $match[0];
@@ -664,7 +672,7 @@ class LoopsParser implements ParserInterface
                             [$match[0]],
                             $this->data
                         )[0];
-                        
+
                         $loopBlock = str_replace(
                             $match[0],
                             $conditionValue,
@@ -672,14 +680,15 @@ class LoopsParser implements ParserInterface
                         );
                     }
                 }
-                
+
                 // process expressions
                 $updatedLoopBody = '';
 
                 if (preg_match('~{{(.*?)}}~',$loopBodyWithoutNestedLoops)) {
                     $updatedLoopBody = ExpressionEvaluator::executeLine(
-                        $loopBlock, 
-                        $this->data
+                        $loopBlock,
+                        $this->data,
+                        $this->template
                     );
                 } else {
                     $updatedLoopBody = $loopBlock;
@@ -693,10 +702,10 @@ class LoopsParser implements ParserInterface
                 );
 
                 if (!empty($matches[0])) {
-                    foreach ($matches as $match) {   
+                    foreach ($matches as $match) {
                         $updatedLoopBody = str_replace(
                             $match[0],
-                            $match[0] . $oldLoopValues .' <% ' . 
+                            $match[0] . $oldLoopValues .' <% ' .
                                 $loop['start']['value'] . '=' . $item . ' %> ',
                             $updatedLoopBody
                         );
@@ -713,14 +722,14 @@ class LoopsParser implements ParserInterface
                     $this->content[$loop['start']['line']]
                 );
         }
-        
+
         // delete all handled inline loops
         $this->inlineLoops = [];
     }
 
     /**
      * Handle nested loop blocks.
-     * 
+     *
      * @return array
      */
     private function handleNestedLoops()
@@ -735,7 +744,7 @@ class LoopsParser implements ParserInterface
 
         foreach ($this->content as $i => $line) {
             // skip inline loops
-            if ((strpos($line, '{% for') !== false) && 
+            if ((strpos($line, '{% for') !== false) &&
                 (strpos($line, '{% end_for') !== false)
             ) {
                 continue;
@@ -744,7 +753,7 @@ class LoopsParser implements ParserInterface
             // skip already processed loops
             if (preg_match(
                     '~{% for \$([a-zA-Z0-9_]+) in (.*?) \(([0-9]+)\) %}~',
-                    $line, 
+                    $line,
                     $matchStartTag
                 )
             ) {
@@ -756,7 +765,7 @@ class LoopsParser implements ParserInterface
                 $line, $matchStartTag)
             ) {
                 // add loop id to the start tag
-                $updatedLoopStartTag = '{% for $' . $matchStartTag[1] . ' in ' . 
+                $updatedLoopStartTag = '{% for $' . $matchStartTag[1] . ' in ' .
                     $matchStartTag[2] . " ($counter) %}";
 
                 // we only update un-nested loop
@@ -788,12 +797,12 @@ class LoopsParser implements ParserInterface
 
                 $skipLoop = false;
             }
-            
+
             if (!$skipLoop && preg_match('~{% break \((.*?)\) %}~',
                 $line, $matchBreakTag)
             ) {
                 // add loop id to the break tag
-                $updatedBreakTag = '{% break (' . $matchBreakTag[1] . ') <' 
+                $updatedBreakTag = '{% break (' . $matchBreakTag[1] . ') <'
                     . end($currentStartTags) . '> %}';
 
                 $this->content[$i] = str_replace(
@@ -809,13 +818,13 @@ class LoopsParser implements ParserInterface
                     'line' => $i
                 ];
             }
-            
+
             if (!$skipLoop && preg_match('~{% continue \((.*?)\) %}~',
                 $line, $matchContinueTag)
             ) {
                 // add loop id to the continue tag
-                $updatedContinueTag = '{% continue (' . 
-                    $matchContinueTag[1] . ') <' 
+                $updatedContinueTag = '{% continue (' .
+                    $matchContinueTag[1] . ') <'
                     . end($currentStartTags) . '> %}';
 
                 $this->content[$i] = str_replace(
@@ -841,7 +850,7 @@ class LoopsParser implements ParserInterface
                 }
 
                 $endingTag = "{% end_for " . end($currentStartTags) . " %}";
-                
+
                 $this->content[$i] = str_replace(
                     '{% end_for %}',
                     $endingTag,
@@ -854,8 +863,8 @@ class LoopsParser implements ParserInterface
                     $line
                 );
             }
-            
-            if (!$skipLoop && preg_match('~{% end_for ([0-9]+) %}~', 
+
+            if (!$skipLoop && preg_match('~{% end_for ([0-9]+) %}~',
                 $line, $matchEndTag)
             ) {
                 $endingTag = $matchEndTag[0];
@@ -866,7 +875,7 @@ class LoopsParser implements ParserInterface
                     'line' => $i
                 ];
 
-                // 'break' and 'continue' outside condition block 
+                // 'break' and 'continue' outside condition block
                 if (!isset($loopStartTag[end($currentStartTags)]) &&
                     isset($breakLoopTag[end($currentStartTags)])
                 ) {
@@ -875,7 +884,7 @@ class LoopsParser implements ParserInterface
                         "in template [{$this->template}]"
                     );
                 }
-                
+
                 if (!isset($loopStartTag[end($currentStartTags)]) &&
                     isset($continueLoopTag[end($currentStartTags)])
                 ) {
@@ -924,7 +933,7 @@ class LoopsParser implements ParserInterface
                     $breakLoopTag = [];
                     $continueLoopTag = [];
                 }
-                
+
                 if ((count($currentStartTags) - 1) >= 0) {
                     unset($currentStartTags[count($currentStartTags) - 1]);
                     $currentStartTags = array_values($currentStartTags);
@@ -947,7 +956,7 @@ class LoopsParser implements ParserInterface
             }
         }
 
-        // 'break' and 'continue' outside loop block 
+        // 'break' and 'continue' outside loop block
         if (count($loopStartTag) == 0 &&
             count($loopEndTag) == 0 &&
             count($breakLoopTag) != 0
@@ -957,7 +966,7 @@ class LoopsParser implements ParserInterface
                 "in template [{$this->template}]"
             );
         }
-        
+
         if (count($loopStartTag) == 0 &&
             count($loopEndTag) == 0 &&
             count($continueLoopTag) != 0
@@ -971,7 +980,7 @@ class LoopsParser implements ParserInterface
 
     /**
      * Execute loop blocks.
-     * 
+     *
      * @return void
      */
     private function executeLoops()
@@ -980,12 +989,12 @@ class LoopsParser implements ParserInterface
             if ($loop['start']['is_nested']) {
                 continue;
             }
-            
+
             // first we check if the loop block was already processed
             if (
                 strpos(
                     $this->content[$loop['start']['line']],
-                    '{% for'   
+                    '{% for'
                 ) === false
             ) {
                 continue;
@@ -1003,7 +1012,7 @@ class LoopsParser implements ParserInterface
             $loopBlockContent = [];
             foreach ($group as $item) {
                 $this->data[$loop['start']['value']] = $item;
-                
+
                 if ($this->breakIsResolved($loop)) {
                     break 1;
                 }
@@ -1012,7 +1021,7 @@ class LoopsParser implements ParserInterface
                     continue 1;
                 }
 
-                // process conditions in loops                
+                // process conditions in loops
                 $loopBody = $this->conditionsParser->parse(
                     $this->extractLoopBody($loop),
                     $this->data
@@ -1030,7 +1039,7 @@ class LoopsParser implements ParserInterface
 
     /**
      * Update the content array with the loops content.
-     * 
+     *
      * @return void
      */
     private function updateContent()
@@ -1039,28 +1048,28 @@ class LoopsParser implements ParserInterface
         $inLoopBody = false;
         $updatedContent = [];
 
-        // here we delete all the stuff between the loop 'start tag' and the 
+        // here we delete all the stuff between the loop 'start tag' and the
         // loop 'end tag' , and the tags it self , then we append the loop's
         // content in place , finally we update the content
         foreach ($this->content as $i => $line) {
-            if (!$inLoopBody && 
+            if (!$inLoopBody &&
                 preg_match('~{% for \$(.*?) in (.*?) \(([0-9]+)\) %}~',
                 $line, $matchStartLoop)
             ) {
                 $loopId = $this->getLoopByStartTag($matchStartLoop[0]);
                 $inLoopBody = true;
-                
+
                 // save line before the loop's start tag
                 $lineParts = explode(
                     $this->loops[$loopId]['start']['tag'],
                     $this->content[$i]
                 );
-                
+
                 $updatedContent[] = $lineParts[0];
-                
+
                 continue;
             }
-            
+
             if ($inLoopBody &&
                 strpos($line, $this->loops[$loopId]['end']['tag']) !== false
             ) {
@@ -1069,7 +1078,7 @@ class LoopsParser implements ParserInterface
                     $this->loops[$loopId]['end']['tag'],
                     $this->content[$i]
                 );
-                
+
                 $updatedContent = array_merge(
                     $updatedContent,
                     $this->loops[$loopId]['body']
@@ -1096,7 +1105,7 @@ class LoopsParser implements ParserInterface
 
     /**
      * Check that the content has no more loops to handle.
-     * 
+     *
      * @return void
      */
     private function noMoreLoops()
@@ -1114,12 +1123,12 @@ class LoopsParser implements ParserInterface
             }
         }
 
-        return true;    
+        return true;
     }
-    
+
     /**
      * Remove loop values tags.
-     * 
+     *
      * @return void
      */
     private function removeLoopValueTags()
@@ -1135,7 +1144,7 @@ class LoopsParser implements ParserInterface
 
     /**
      * Parse loops in a template.
-     * 
+     *
      * @param array $content
      * @param array &$data
      * @return array
@@ -1144,13 +1153,13 @@ class LoopsParser implements ParserInterface
     {
         $this->content = $content;
         $this->data = $data;
-        
+
         $this->conditionsParser->template = $this->template;
 
         while (!$this->noMoreLoops()) {
             $this->handleNestedInlineLoops();
             $this->executeInlineLoops();
-            
+
             $this->handleNestedLoops();
             $this->executeLoops();
 

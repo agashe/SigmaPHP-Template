@@ -16,7 +16,7 @@ use SigmaPHP\Template\Parsers\VariablesParser;
 use SigmaPHP\Template\Cache;
 
 /**
- * Template Engine Class 
+ * Template Engine Class
  */
 class Engine implements EngineInterface
 {
@@ -59,12 +59,12 @@ class Engine implements EngineInterface
      * @var \BlocksParser $blocksParser
      */
     private $blocksParser;
-    
+
     /**
      * @var \ConditionsParser $conditionsParser
      */
     private $conditionsParser;
-    
+
     /**
      * @var \LoopsParser $loopsParser
      */
@@ -92,7 +92,7 @@ class Engine implements EngineInterface
 
     /**
      * Template Engine Constructor.
-     * 
+     *
      * @param string $templatesPath
      * @param string $cachePath
      */
@@ -103,7 +103,7 @@ class Engine implements EngineInterface
                 \Composer\Autoload\ClassLoader::class
             ))->getFileName()
         , 3);
-        
+
         $this->templatesPath = trim($templatesPath, './');
         $this->cachePath = trim($cachePath, './');
 
@@ -120,8 +120,8 @@ class Engine implements EngineInterface
 
     /**
      * Render template.
-     * 
-     * @param string $template 
+     *
+     * @param string $template
      * @param array $data
      * @param bool $print
      * @return string|void
@@ -130,7 +130,7 @@ class Engine implements EngineInterface
     {
         // in case the developer used './' with the render method
         // we remove it since it points to the relative base path
-        // which in this case the path to templates  
+        // which in this case the path to templates
         $template = str_replace('./', '', $template);
 
         // prefix template's name
@@ -139,7 +139,7 @@ class Engine implements EngineInterface
         // load the template's content
         $this->content = $this->getTemplateContent($template);
 
-        // merge the shared variables 
+        // merge the shared variables
         $this->data = array_merge($this->sharedVariables, $data);
 
         // init parsers
@@ -149,15 +149,15 @@ class Engine implements EngineInterface
         $this->variablesParser->template = $this->template;
 
         $this->blocksParser->blocks = [];
-        
+
         $this->conditionsParser->conditions = [];
         $this->conditionsParser->inlineConditions = [];
-        
+
         $this->loopsParser->loops = [];
         $this->loopsParser->inlineLoops = [];
 
         while ($this->processTemplate());
-        
+
         // print or return the processed template
         $content = implode("\n", $this->content);
 
@@ -171,7 +171,7 @@ class Engine implements EngineInterface
 
     /**
      * Render template.
-     * 
+     *
      * @param string $name
      * @param callable $callback
      * @return void
@@ -183,14 +183,14 @@ class Engine implements EngineInterface
                 "Invalid callback function for custom directive [{$name}]"
             );
         }
-        
+
         if (in_array($name, [
             'extend', 'include', 'show_block', 'block', 'end_block',
             'define', 'if', 'else_if', 'else', 'end_if',
             'for', 'break', 'continue', 'end_for'
         ])) {
             throw new InvalidArgumentException(
-                "Can't use reserved word as a name " . 
+                "Can't use reserved word as a name " .
                 "for custom directive [{$name}]"
             );
         }
@@ -200,7 +200,7 @@ class Engine implements EngineInterface
 
     /**
      * Set shared variables.
-     * 
+     *
      * @param array $variables
      * @return void
      */
@@ -219,21 +219,21 @@ class Engine implements EngineInterface
 
     /**
      * Get template file content.
-     * 
+     *
      * @param string $templateFileName
      * @return array
      */
     private function getTemplateContent($templateFileName)
     {
         $templateFullPath = $this->getTemplateFullPath($templateFileName);
-        
+
         if (!file_exists($templateFullPath)) {
             throw new TemplateNotFoundException(
                 "The requested template [{$templateFullPath}] doesn't exist"
             );
         }
 
-        // load cache if enabled , and we have cache hit , otherwise proceed 
+        // load cache if enabled , and we have cache hit , otherwise proceed
         // with fresh processing
         if (!empty($this->cachePath)) {
             $cachedContent = $this->cache->load(
@@ -250,11 +250,11 @@ class Engine implements EngineInterface
             }
         }
 
-        // clean lines break and return the content as array 
+        // clean lines break and return the content as array
         $content = explode("\n", str_replace(
             ["\n\r", "\r"],
             "\n",
-            file_get_contents($templateFullPath)  
+            file_get_contents($templateFullPath)
         ));
 
         // handle relative path in the new content , assume we have :
@@ -279,8 +279,8 @@ class Engine implements EngineInterface
     }
 
     /**
-     * Check if one word from an array exists in a text. 
-     * 
+     * Check if one word from an array exists in a text.
+     *
      * @param array $phrases
      * @param string $text
      * @return bool
@@ -295,10 +295,10 @@ class Engine implements EngineInterface
 
         return false;
     }
-    
+
     /**
      * Get template's full path.
-     * 
+     *
      * @param string $template
      * @return string
      */
@@ -306,7 +306,7 @@ class Engine implements EngineInterface
     {
         // in case the template is in a sub-directory
         // we use dot-notation , but it's just the matter of
-        // replace the dots with slashes to get the correct path 
+        // replace the dots with slashes to get the correct path
         $templateFileNameFormatted = str_replace('.', '/', $template);
 
         return $this->basePath . '/' .
@@ -316,8 +316,8 @@ class Engine implements EngineInterface
     }
 
     /**
-     * Handle relative path in extend and include. 
-     * 
+     * Handle relative path in extend and include.
+     *
      * @param array $content
      * @param string $path
      * @return array
@@ -332,7 +332,7 @@ class Engine implements EngineInterface
             {
                 if ($this->phraseExists(['./'], $match[2])) {
                     $match[2] = str_replace('./', '', $match[2]);
-                    
+
                     $content[$i] = str_replace(
                         './'.$match[2],
                         $path . '.' . $match[2],
@@ -348,7 +348,7 @@ class Engine implements EngineInterface
             ) {
                 if ($this->phraseExists(['./'], $match[2])) {
                     $match[2] = str_replace('./', '', $match[2]);
-                    
+
                     $content[$i] = str_replace(
                         './'.$match[2],
                         $path . '.' . $match[2],
@@ -363,7 +363,7 @@ class Engine implements EngineInterface
 
     /**
      * Remove comments block from template.
-     * 
+     *
      * @return void
      */
     private function removeComments()
@@ -404,7 +404,7 @@ class Engine implements EngineInterface
             ) {
                 $this->content[$i] = '';
             }
-            
+
             if ($isComment && (strpos($line, '--}') !== false)) {
                 $lineParts = explode('--}', $line);
 
@@ -420,8 +420,8 @@ class Engine implements EngineInterface
     }
 
     /**
-     * Clean extra spaces from template lines. 
-     * 
+     * Clean extra spaces from template lines.
+     *
      * @return void
      */
     private function cleanTemplate()
@@ -429,9 +429,9 @@ class Engine implements EngineInterface
         foreach ($this->content as $i => $line) {
             // handle spaces in the tags properly
             $line = preg_replace(
-                ['~{%\s*~', '~\s*%}~', '~define\s+~' , 
+                ['~{%\s*~', '~\s*%}~', '~define\s+~' ,
                     '~show_block\s*~', '~\s+=\s+~',],
-                ['{% ', ' %}', 'define ', 'show_block ', ' = '], 
+                ['{% ', ' %}', 'define ', 'show_block ', ' = '],
                 $line
             );
 
@@ -445,29 +445,29 @@ class Engine implements EngineInterface
                     '~{% extend ([\"|\']+){1}([a-zA-Z0-9\.\-\_\/]+)(\1) %}~',
                     '~{% include ([\"|\']+){1}([a-zA-Z0-9\.\-\_\/]+)(\1) %}~',
                     '~{% show_block ([\"|\']+){1}([a-zA-Z0-9\.\-\_]+)(\1) %}~',
-                    '~{% block ([\"|\']+){1}([a-zA-Z0-9\.\-\_]+)(\1) %}~', 
-                    '~{% end_block %}~', 
-                    '~{% end_block ([\"|\']+){1}([a-zA-Z0-9\.\-\_]+)(\1) %}~', 
+                    '~{% block ([\"|\']+){1}([a-zA-Z0-9\.\-\_]+)(\1) %}~',
+                    '~{% end_block %}~',
+                    '~{% end_block ([\"|\']+){1}([a-zA-Z0-9\.\-\_]+)(\1) %}~',
                     '~{% define \$([a-zA-Z0-9_]+)\s*=\s*(.*) %}~',
                     '~{% if \((.*?)\) %}~',
                     '~{% else_if \((.*?)\) %}~',
                     '~{% else %}~',
-                    '~{% else ([0-9]+) %}~', 
+                    '~{% else ([0-9]+) %}~',
                     '~{% end_if %}~',
-                    '~{% end_if ([0-9]+) %}~', 
+                    '~{% end_if ([0-9]+) %}~',
                     '~{% for \$([a-zA-Z0-9_]+) in (.*?) %}~',
                     '~{% for \$([a-zA-Z0-9_]+) in (.*?) \(([0-9]+)\) %}~',
                     '~{% break \((.*?)\) %}~',
                     '~{% continue \((.*?)\) %}~',
                     '~{% break \((.*?)\) \<([0-9]+)\> %}~',
                     '~{% continue \((.*?)\) \<([0-9]+)\> %}~',
-                    '~{% end_for ([0-9]+) %}~', 
+                    '~{% end_for ([0-9]+) %}~',
                     '~{% end_for %}~',
                     '~{%\s*([a-zA-Z0-9\_]+)\((.*?)\)\s*%}~'
                 ];
 
-                // loop until all commands are counted , the counter will 
-                // reach 0 if all the commands are valid , otherwise it 
+                // loop until all commands are counted , the counter will
+                // reach 0 if all the commands are valid , otherwise it
                 // will throw exception
                 $lineCommands = array_map(function ($line) {
                     return '{%' . $line;
@@ -492,10 +492,10 @@ class Engine implements EngineInterface
             $this->content[$i] = $line;
         }
     }
-    
+
     /**
-     * Traverse through template lines and handle different cases. 
-     * 
+     * Traverse through template lines and handle different cases.
+     *
      * @return bool
      */
     private function processTemplate()
@@ -506,9 +506,9 @@ class Engine implements EngineInterface
 
         $this->removeComments();
         $this->cleanTemplate();
-        
+
         // in case the first line of the template was 'extend'
-        // we need to handle it before any further processing 
+        // we need to handle it before any further processing
         // on the template
         if (preg_match('~{% extend ([\"|\']+){1}([a-zA-Z0-9\.\-\_\/]+)(\1) %}~',
             $this->content[0], $match)
@@ -516,11 +516,11 @@ class Engine implements EngineInterface
             // remove the 'extend' directive
             $this->content[0] = '';
 
-            // prepend the parent template content to the child 
+            // prepend the parent template content to the child
             $this->content = array_merge(
                 $this->getTemplateContent($match[2]),
                 $this->content
-            );            
+            );
         }
 
         $this->content = $this->variablesParser->parse(
@@ -558,8 +558,8 @@ class Engine implements EngineInterface
             } else {
                 $isBlankLine = false;
             }
-            
-            // append normal lines 
+
+            // append normal lines
             if (!$this->phraseExists(['{%', '{{'], $line)) {
                 $updatedContent[] = $line;
                 continue;
@@ -572,7 +572,7 @@ class Engine implements EngineInterface
                 $updatedContent[] = $line;
                 continue;
             }
-            
+
             // handle extend template case
             if (preg_match(
                 '~{% extend ([\"|\']+){1}([a-zA-Z0-9\.\-\_\/]+)(\1) %}~',
@@ -582,7 +582,7 @@ class Engine implements EngineInterface
                     $updatedContent,
                     $this->getTemplateContent($match[2])
                 );
-                
+
                 $recheck = true;
             }
 
@@ -621,40 +621,42 @@ class Engine implements EngineInterface
                     $line = str_replace($match[0], $blockBody[0], $line);
 
                     $line = ExpressionEvaluator::executeLine(
-                        $line, 
-                        $this->data
+                        $line,
+                        $this->data,
+                        $this->template
                     );
-                    
+
                     $blockBody[0] = $line;
                 } else {
                     $lineParts = explode($match[0], $line);
                     $line = str_replace($match[0], '', $line);
 
                     $blockBody[0] = $lineParts[0] . $blockBody[0];
-                    $blockBody[count($blockBody) - 1] =  
+                    $blockBody[count($blockBody) - 1] =
                         $blockBody[count($blockBody) - 1] . $lineParts[1];
                 }
 
-                // save the update to the content 
+                // save the update to the content
                 $this->content[$i] = $line;
 
                 $updatedContent = array_merge($updatedContent, $blockBody);
 
                 $recheck = true;
             }
-                        
+
             // process variables
             if (preg_match('~{{(.*?)}}~', $line, $match)) {
                 $line = ExpressionEvaluator::executeLine(
-                    $line, 
-                    $this->data
+                    $line,
+                    $this->data,
+                    $this->template
                 );
 
                 $this->content[$i] = $line;
 
                 $updatedContent[] = $line;
             }
-            
+
             // process expressions and custom directives
             if (preg_match('~{%\s*([a-zA-Z0-9\_]+)\((.*?)\)\s*%}~',
                 $line, $match)
@@ -674,7 +676,8 @@ class Engine implements EngineInterface
                     $arguments = array_map(function ($argument) {
                         return ExpressionEvaluator::execute(
                             $argument,
-                            $this->data
+                            $this->data,
+                            $this->template
                         );
                     }, $arguments);
                 }
@@ -694,7 +697,7 @@ class Engine implements EngineInterface
 
                 $updatedContent[] = $line;
             }
-            
+
             // check if any further check is required
             if ($this->phraseExists([
                 '{% if', '{% else_if', '{% else', '{% end_if',

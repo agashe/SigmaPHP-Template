@@ -7,7 +7,7 @@ use SigmaPHP\Template\Interfaces\ParserInterface;
 use SigmaPHP\Template\ExpressionEvaluator;
 
 /**
- * Variables Parser Class 
+ * Variables Parser Class
  */
 class VariablesParser implements ParserInterface
 {
@@ -15,7 +15,7 @@ class VariablesParser implements ParserInterface
      * @var array $content
      */
     private $content;
-    
+
     /**
      * @var array $data
      */
@@ -37,7 +37,7 @@ class VariablesParser implements ParserInterface
 
     /**
      * Define variables on line.
-     * 
+     *
      * @param string $line
      * @param int $lineNumber
      * @return void
@@ -48,7 +48,7 @@ class VariablesParser implements ParserInterface
         // and do our process , then remove the definition tags
         // finally we glue everything back together
         $lineParts = explode('{%', $line);
-        
+
         foreach ($lineParts as $part) {
             if (preg_match(
                 '~{% define \$([a-zA-Z0-9_]+)\s*=\s*(.*) %}~',
@@ -56,7 +56,8 @@ class VariablesParser implements ParserInterface
             ) {
                 $this->data[$match[1]] = ExpressionEvaluator::execute(
                     $match[2],
-                    $this->data
+                    $this->data,
+                    $this->template
                 );
 
                 $this->content[$lineNumber] = str_replace(
@@ -67,10 +68,10 @@ class VariablesParser implements ParserInterface
             }
         }
     }
-    
+
     /**
      * Handle variables inside nested inline conditions , blocks and loops.
-     * 
+     *
      * @return void
      */
     private function handleVariablesInsideNestedInlineDirectives()
@@ -79,46 +80,46 @@ class VariablesParser implements ParserInterface
             // skip the lines that don't contain inline directives
             if (
                 !((strpos($line, '{% if') !== false) &&
-                 (strpos($line, '{% end_if ') !== false)    
+                 (strpos($line, '{% end_if ') !== false)
                 ) &&
                 !((strpos($line, '{% block') !== false) &&
-                 (strpos($line, '{% end_block ') !== false)    
+                 (strpos($line, '{% end_block ') !== false)
                 ) &&
                 !((strpos($line, '{% for') !== false) &&
-                 (strpos($line, '{% end_for') !== false)    
-                ) 
+                 (strpos($line, '{% end_for') !== false)
+                )
             ) {
                 continue;
             }
 
             $lineParts = explode('{%', $line);
-            
+
             // check for variables inside blocks , conditions and loops
             // if found throw exception , otherwise define them
             $isCondition = 0;
             $isBlock = 0;
             $isLoop = 0;
-    
+
             foreach ($lineParts as $part) {
                 $part = '{%' . $part;
-    
+
                 if (!$isCondition && !$isBlock && !$isLoop) {
                     $this->defineVariables($part, $i);
                 }
-    
+
                 if (strpos($part, '{% if') !== false) {
                     $isCondition += 1;
                 }
-                
+
                 if (strpos($part, '{% block') !== false) {
                     $isBlock += 1;
                 }
-    
-    
+
+
                 if (strpos($part, '{% for') !== false) {
                     $isLoop += 1;
                 }
-                
+
                 if ($isCondition || $isBlock || $isLoop) {
                     if (preg_match(
                         '~{% define \$([a-zA-Z0-9_]+)\s*=\s*(.*) %}~',
@@ -130,15 +131,15 @@ class VariablesParser implements ParserInterface
                         );
                     }
                 }
-    
+
                 if (strpos($part, '{% end_if') !== false) {
                     $isCondition -= 1;
                 }
-    
+
                 if (strpos($part, '{% end_block') !== false) {
                     $isBlock -= 1;
                 }
-    
+
                 if (strpos($part, '{% end_for') !== false) {
                     $isLoop -= 1;
                 }
@@ -148,11 +149,11 @@ class VariablesParser implements ParserInterface
 
     /**
      * Handle variables mixed with directives.
-     * 
+     *
      * @return void
      */
     private function handleVariablesMixedWithDirectives()
-    {   
+    {
         // we break each line into 2 part , then we check if after the start tag
         // a variable definition or before the end tag , only in that case we
         // throw exception , otherwise we continue execution
@@ -171,13 +172,13 @@ class VariablesParser implements ParserInterface
                     (strpos($line, '{% end_if') !== false) ||
                     (strpos($line, '{% end_block') !== false) ||
                     (strpos($line, '{% end_for') !== false)
-                )    
+                )
             ) {
                 foreach ($directives as $n => $directive) {
                     $lineParts = explode('{% ' . $directive, $line);
-                        
-                    if (isset($lineParts[1]) && 
-                        (strpos($lineParts[((int)($n <= 2))], 
+
+                    if (isset($lineParts[1]) &&
+                        (strpos($lineParts[((int)($n <= 2))],
                             '{% define') !== false)
                     ) {
                         throw new TemplateParsingException(
@@ -194,7 +195,7 @@ class VariablesParser implements ParserInterface
 
     /**
      * Handle variables inside nested conditions , blocks and loops.
-     * 
+     *
      * @return void
      */
     private function handleVariablesInsideNestedDirectives()
@@ -214,7 +215,7 @@ class VariablesParser implements ParserInterface
                     (strpos($line, '{% end_if') !== false) ||
                     (strpos($line, '{% end_block') !== false) ||
                     (strpos($line, '{% end_for') !== false)
-                )    
+                )
             ) {
                 continue;
             }
@@ -228,7 +229,7 @@ class VariablesParser implements ParserInterface
                 if (strpos($line, '{% if') !== false) {
                     $isCondition += 1;
                 }
-                
+
                 if (strpos($line, '{% block') !== false) {
                     $isBlock += 1;
                 }
@@ -238,7 +239,7 @@ class VariablesParser implements ParserInterface
                     $isLoop += 1;
                 }
             }
-            
+
             if ($isCondition || $isBlock || $isLoop) {
                 if (preg_match(
                     '~{% define \$([a-zA-Z0-9_]+)\s*=\s*(.*) %}~',
@@ -252,7 +253,7 @@ class VariablesParser implements ParserInterface
             }
 
             if (strpos($line, '{% define') === false) {
-                if (($isCondition > 0) && 
+                if (($isCondition > 0) &&
                     strpos($line, '{% end_if') !== false
                 ) {
                     $isCondition -= 1;
@@ -268,10 +269,10 @@ class VariablesParser implements ParserInterface
             }
         }
     }
-    
+
     /**
      * Parse variables in a template.
-     * 
+     *
      * @param array $content
      * @param array &$data
      * @return array

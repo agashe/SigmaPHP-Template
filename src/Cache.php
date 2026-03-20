@@ -6,7 +6,7 @@ use SigmaPHP\Template\Exceptions\CacheProcessFailedException;
 use SigmaPHP\Template\Interfaces\CacheInterface;
 
 /**
- * Cache Class 
+ * Cache Class
  */
 class Cache implements CacheInterface
 {
@@ -22,7 +22,7 @@ class Cache implements CacheInterface
 
     /**
      * Cache Constructor.
-     * 
+     *
      * @param string $basePath
      * @param string $cachePath
      */
@@ -34,7 +34,7 @@ class Cache implements CacheInterface
 
     /**
      * Get cache file's full path for a template.
-     * 
+     *
      * @param string $template
      * @param int $modificationTime
      * @return string
@@ -46,14 +46,14 @@ class Cache implements CacheInterface
         // 2- modification time of the template file (this will be used later)
         // 3- md5 for 1 and 2
         // 4- subtract the first 30 characters , and this the cache file's name
-        return $this->basePath . '/' . 
-            $this->cachePath . '/' . 
+        return $this->basePath . '/' .
+            $this->cachePath . '/' .
             substr(md5($template . $modificationTime), 0, 30);
     }
-    
+
     /**
-     * Save processed content for template as cache file. 
-     * 
+     * Save processed content for template as cache file.
+     *
      * @param string $template
      * @param int $modificationTime
      * @param string $content
@@ -63,19 +63,21 @@ class Cache implements CacheInterface
     {
         try {
             file_put_contents(
-                $this->getCacheFullPath($template, $modificationTime), 
+                $this->getCacheFullPath($template, $modificationTime),
                 $content
             );
         } catch (\Exception $e) {
             throw new CacheProcessFailedException(
-                "Can't save cache file for templates"
+                "Failed to save template cache at " .
+                $this->basePath . '/' . $this->cachePath . ': ' .
+                $e->getMessage()
             );
         }
     }
 
     /**
-     * Load processed content for template from a cache file. 
-     * 
+     * Load processed content for template from a cache file.
+     *
      * @param string $template
      * @param int $modificationTime
      * @return string|bool
@@ -84,13 +86,13 @@ class Cache implements CacheInterface
     {
         $cacheFilePath = $this->getCacheFullPath($template, $modificationTime);
 
-        return $this->validate($template, $modificationTime) ? 
+        return $this->validate($template, $modificationTime) ?
             file_get_contents($cacheFilePath) : false;
     }
 
     /**
      * Validate cache by comparing time of modification.
-     * 
+     *
      * @param string $template
      * @param int $modificationTime
      * @return bool

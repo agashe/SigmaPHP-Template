@@ -1,5 +1,5 @@
 {
-    "name": "agashe/sigmaphp-template",
+    "name": "sigmaphp/sigmaphp-template",
     "description": "A powerful template engine for PHP",
 	"keywords": ["SigmaPHP", "framework", "template-engine"],
     "type": "library",

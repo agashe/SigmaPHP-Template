@@ -19,7 +19,7 @@ A powerful template engine for PHP. That you can use to build your web apps , wi
 ## Installation
 
 ``` 
-composer require agashe/sigmaphp-template
+composer require sigmaphp/sigmaphp-template
 ```
 
 ## Documentation

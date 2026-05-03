@@ -655,6 +655,10 @@ class Engine implements EngineInterface
                 $this->content[$i] = $line;
 
                 $updatedContent[] = $line;
+
+                $recheck = true;
+                continue;
+                print "----- var: $line<br>";
             }
 
             // process expressions and custom directives
@@ -689,13 +693,18 @@ class Engine implements EngineInterface
 
                 $line = str_replace(
                     $match[0],
-                    ' ' . $result . ' ',
+                    $result,
                     $line
                 );
 
                 $this->content[$i] = $line;
 
                 $updatedContent[] = $line;
+
+                $recheck = true;
+                continue;
+
+                print "----- exp: $line<br>";
             }
 
             // check if any further check is required

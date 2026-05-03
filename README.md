@@ -55,7 +55,7 @@ require 'vendor/autoload.php';
 
 use SigmaPHP\Template\Engine;
 
-$engine = new Engine('/templates');
+$engine = new Engine('templates/');
 
 $output = $engine->render('index');
 ```

@@ -1,5 +1,5 @@
-Result : {% add(1, 2, 3) %}
+{% for $item in $items %} {{ $item }} {% end_for %} Result : {% add(1, 2, 3) %}
 
-{% formatAmount(75.25) %}
+{% for $k in 2 %} {{ $k }} {% end_for %} {% formatAmount(75.25) %}
 
-{% year() %}
+{{ $items[1] }} {% year() %}

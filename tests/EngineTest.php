@@ -302,6 +302,14 @@ class EngineTest extends TestCase
      */
     public function testCustomDirectives()
     {
+        $variables = [
+            'items' => [
+                'item #1',
+                'item #2',
+                'item #3',
+            ]
+        ];
+
         $this->engine->registerCustomDirective('add', function (...$numbers) {
             $sum = 0;
 
@@ -323,7 +331,7 @@ class EngineTest extends TestCase
         });
 
         $this->assertTrue($this->checkOutput(
-            $this->renderTemplate('directives'),
+            $this->renderTemplate('directives', $variables),
             $this->getTemplateResult('directives')
         ));
     }

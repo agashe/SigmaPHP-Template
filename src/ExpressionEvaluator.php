@@ -56,7 +56,7 @@ class ExpressionEvaluator implements ExpressionEvaluatorInterface
 
         if (preg_match($pattern, $expressionFiltered) === 1) {
             throw new InvalidExpressionException(
-                "Invalid expression : ({$expression})"  .
+                "Invalid expression : ({$expression}) "  .
                 "in template [{$template}]"
             );
         }
@@ -75,7 +75,7 @@ class ExpressionEvaluator implements ExpressionEvaluatorInterface
                     strpos($expression, "empty($$_match)") === false
                 ) {
                     throw new UndefinedVariableException(
-                        "Undefined variable : $$_match" .
+                        "Undefined variable : $$_match " .
                         "in template [{$template}]"
                     );
                 }
@@ -126,7 +126,7 @@ class ExpressionEvaluator implements ExpressionEvaluatorInterface
 
             if (empty($matchExpression[1])) {
                 throw new InvalidExpressionException(
-                    "Can't process empty expression on line : [{$line}]" .
+                    "Can't process empty expression on line : [{$line}] " .
                     "in template [{$template}]"
                 );
             }

@@ -263,7 +263,12 @@ class EngineTest extends TestCase
     public function testConditions()
     {
         $variables = [
-            'test1' => 'TEST #1'
+            'test1' => 'TEST #1',
+            'items' => [
+                'item #1',
+                'item #2',
+                'item #3',
+            ]
         ];
 
         $this->assertTrue($this->checkOutput(

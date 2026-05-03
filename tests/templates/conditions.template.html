@@ -1,23 +1,23 @@
-{% if (isset($test1)) %} 
+{% if (isset($test1)) %}
     Test 1 is set !
 {% end_if %}
 
-{% if ($test1 == 'TEST FOO') %} 
+{% if ($test1 == 'TEST FOO') %}
     Test 1 equals foo
-{% else %} 
+{% else %}
     Test doesn't equals foo
 {% end_if %}
 
-{% if ($test1 == 'TEST FOO') %} 
+{% if ($test1 == 'TEST FOO') %}
     Test 1 equals : Foo
-{% else_if ($test1 == 'TEST #1') %} 
+{% else_if ($test1 == 'TEST #1') %}
     Test 1 equals : TEST #1
-{% else %} 
+{% else %}
     Test doesn't equals foo or test #1
 {% end_if %}
 
-{% if (isset($test1)) %} 
-    {% if ($test1 == 'TEST #1') %} 
+{% if (isset($test1)) %}
+    {% if ($test1 == 'TEST #1') %}
         Test 1 equals : TEST #1
     {% end_if %}
 {% end_if %}
@@ -32,11 +32,11 @@
     Very Good
 {% else_if ($grade >= 60 && $grade < 70) %}
     Good
-{% else %} 
+{% else %}
     Fail
 {% end_if %}
 
-{% if (isset($grade)) %} 
+{% if (isset($grade)) %}
     {% if ($grade >= 90) %}
         Excellent
     {% else_if ($grade >= 80 && $grade < 90) %}
@@ -45,12 +45,12 @@
         Very Good
     {% else_if ($grade >= 60 && $grade < 70) %}
         Good
-    {% else %} 
+    {% else %}
         Fail
     {% end_if %}
 {% end_if %}
 
-{% if (isset($test1)) %} 
+{% if (isset($test1)) %}
     {% block 'foo' %}
         foo
     {% end_block %}
@@ -61,7 +61,7 @@
 {% show_block 'foo' %}
 
 {% define $x =          1000 %}
-{% if (1) %} 
+{% if (1) %}
     {{$x}}
 {% end_if %}
 
@@ -76,10 +76,28 @@
 
 {% define $foo = true %}
 
-{% if (!isset($undefined)) %} 
+{% if (!isset($undefined)) %}
     undefined
 {% end_if %}
 
-{% if (empty($undefined)) %} 
+{% if (empty($undefined)) %}
     undefined is empty
+{% end_if %}
+
+{% define $id = 1 %}
+
+{% if (isset($items[$id])) %}
+    item #{{ $id }} is defined with value : {{$items[$id]}}
+{% end_if %}
+
+{% if (!isset($items[3])) %}
+    item #3 is not defined
+{% end_if %}
+
+{% if (!empty($items[$id])) %}
+    item #{{ $id }} is defined with value : {{$items[$id]}}
+{% end_if %}
+
+{% if (empty($items[3])) %}
+    item #3 is empty
 {% end_if %}
